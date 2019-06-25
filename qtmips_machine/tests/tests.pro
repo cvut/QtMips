@@ -12,7 +12,8 @@ win32:CONFIG(release, debug|release): LIBS_SUBDIR = release
 else:win32:CONFIG(debug, debug|release): LIBS_SUBDIR = debug
 else:unix: LIBS_SUBDIR = .
 
-LIBS += -L$$OUT_PWD/../$${LIBS_SUBDIR} -lqtmips_machine -lelf
+LIBS += -L$$OUT_PWD/../$${LIBS_SUBDIR} -lqtmips_machine
+LIBS += -L$$OUT_PWD/../../libelf/$${LIBS_SUBDIR} -lelf
 
 PRE_TARGETDEPS += $$OUT_PWD/../$${LIBS_SUBDIR}/libqtmips_machine.a
 
@@ -23,6 +24,8 @@ unix: LIBS += \
         # --enable-new-dtags \
 
 INCLUDEPATH += $$PWD/..
+INCLUDEPATH += $$PWD/../..
+INCLUDEPATH += $$PWD/../../libelf
 DEPENDPATH += $$PWD/..
 QMAKE_CXXFLAGS += -std=c++0x
 

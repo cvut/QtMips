@@ -12,9 +12,11 @@ else:win32:CONFIG(debug, debug|release): LIBS_SUBDIR = debug
 else:unix: LIBS_SUBDIR = .
 
 LIBS += -L$$OUT_PWD/../qtmips_osemu/$${LIBS_SUBDIR}  -lqtmips_osemu
-LIBS += -L$$OUT_PWD/../qtmips_machine/$${LIBS_SUBDIR} -lqtmips_machine -lelf
+LIBS += -L$$OUT_PWD/../qtmips_machine/$${LIBS_SUBDIR} -lqtmips_machine
 LIBS += -L$$OUT_PWD/../qtmips_asm/$${LIBS_SUBDIR} -lqtmips_asm -lelf
+LIBS += -L$$OUT_PWD/../libelf/$${LIBS_SUBDIR} -lelf
 
+PRE_TARGETDEPS += $$OUT_PWD/../libelf/$${LIBS_SUBDIR}/libelf.a
 PRE_TARGETDEPS += $$OUT_PWD/../qtmips_osemu/$${LIBS_SUBDIR}/libqtmips_osemu.a
 PRE_TARGETDEPS += $$OUT_PWD/../qtmips_machine/$${LIBS_SUBDIR}/libqtmips_machine.a
 PRE_TARGETDEPS += $$OUT_PWD/../qtmips_asm/$${LIBS_SUBDIR}/libqtmips_asm.a
@@ -25,7 +27,9 @@ unix: LIBS += \
         -Wl,-rpath,\'$${DOLAR}$${DOLAR}ORIGIN/../lib\' \
         # --enable-new-dtags \
 
+INCLUDEPATH += $$PWD/../libelf
 INCLUDEPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu $$PWD/../qtmips_asm
+INCLUDEPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu
 DEPENDPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu $$PWD/../qtmips_asm
 QMAKE_CXXFLAGS += -std=c++0x
 QMAKE_CXXFLAGS_DEBUG += -ggdb

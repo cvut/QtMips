@@ -6,6 +6,8 @@ CONFIG += c++11
 TEMPLATE = lib
 CONFIG += staticlib
 
+INCLUDEPATH += $$PWD/..
+INCLUDEPATH += $$PWD/../libelf
 LIBS += -lelf
 QMAKE_CXXFLAGS += -std=c++0x
 QMAKE_CXXFLAGS_DEBUG += -ggdb

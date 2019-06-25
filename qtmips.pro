@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+    libelf \
     qtmips_machine \
     qtmips_osemu \
     qtmips_asm
