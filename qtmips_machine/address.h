@@ -61,14 +61,14 @@ public:
     uint_xlen_t get_data() const;
 
     /* Eq */
-    bool operator==(const Address &rhs) const;
-    bool operator!=(const Address &rhs) const;
+    bool operator==(const Address &other) const;
+    bool operator!=(const Address &other) const;
 
     /* Ord */
-    bool operator<(const Address &rhs) const;
-    bool operator>(const Address &rhs) const;
-    bool operator<=(const Address &rhs) const;
-    bool operator>=(const Address &rhs) const;
+    bool operator<(const Address &other) const;
+    bool operator>(const Address &other) const;
+    bool operator<=(const Address &other) const;
+    bool operator>=(const Address &other) const;
 
     /* Offset arithmetic */
     Address operator+(const uint_xlen_t &offset) const;
