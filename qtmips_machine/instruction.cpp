@@ -42,7 +42,7 @@
 #include <cstring>
 #include "instruction.h"
 #include "alu.h"
-#include "memory.h"
+#include "memory/frontend_memory.h"
 #include "utils.h"
 #include "qtmipsexception.h"
 
@@ -853,10 +853,10 @@ Instruction::Instruction(std::uint8_t opcode, std::uint8_t rs, std::uint8_t rt, 
     this->dt |= immediate;
 }
 
-Instruction::Instruction(std::uint8_t opcode, std::uint32_t address) {
+Instruction::Instruction(std::uint8_t opcode, Address address) {
     this->dt = 0;
     this->dt |= opcode << 26;
-    this->dt |= address;
+    this->dt |= address.get_raw();
 }
 
 Instruction::Instruction(const Instruction &i) {
@@ -898,8 +898,8 @@ std::uint16_t Instruction::immediate() const {
     return (std::uint16_t) MASK(16, 0);
 }
 
-std::uint32_t Instruction::address() const {
-    return (std::uint32_t) MASK(26, 0);
+Address Instruction::address() const {
+    return Address(MASK(26, 0));
 }
 
 std::uint32_t Instruction::data() const {
@@ -970,7 +970,7 @@ Instruction &Instruction::operator=(const Instruction &c) {
     return *this;
 }
 
-QString Instruction::to_str(std::int32_t inst_addr) const {
+QString Instruction::to_str(Address inst_addr) const {
     const InstructionMap &im = InstructionMapFind(dt);
     // TODO there are exception where some fields are zero and such so we should not print them in such case
     if (dt == 0)
@@ -1016,12 +1016,12 @@ QString Instruction::to_str(std::int32_t inst_addr) const {
                     res += "0x" + QString::number(field, 16).toUpper();
                 break;
             case 'p':
-                field += inst_addr + 4;
+                field += (inst_addr + 4).get_raw();
                 res += "0x" + QString::number((std::uint32_t)field, 16).toUpper();
                 break;
             case 'a':
-                std::uint32_t target = (inst_addr & 0xF0000000) | (address() << 2);
-                res += " 0x" + QString::number(target, 16).toUpper();
+                Address target = (inst_addr & 0xF0000000) | (address() << 2).get_raw();
+                res += " 0x" + QString::number(target.get_raw(), 16).toUpper();
                 break;
             }
         }
@@ -1109,9 +1109,9 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
     return res;
 }
 
-static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_addr,
-                    std::int64_t offset, const ArgumentDesc *adesc, uint *chars_taken = nullptr,
-                    QString filename = "", int line = 0, int options = 0) {
+static void reloc_append(RelocExpressionList *reloc, QString fl, Address inst_addr,
+                         std::int64_t offset, const ArgumentDesc *adesc, uint *chars_taken = nullptr,
+                         QString filename = "", int line = 0, int options = 0) {
     uint bits = IMF_SUB_GET_BITS(adesc->loc);
     uint shift = IMF_SUB_GET_SHIFT(adesc->loc);
     QString expression = "";
@@ -1139,9 +1139,9 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
 #define CFS_OPTION_SILENT_MASK 0x100
 
 ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
-                       QString inst_base, QStringList &inst_fields, QString &error,
-                       std::uint32_t inst_addr, RelocExpressionList *reloc,
-                       QString filename, int line, bool pseudo_opt, int options)
+                                      QString inst_base, QStringList &inst_fields, QString &error,
+                                      Address inst_addr, RelocExpressionList *reloc,
+                                      QString filename, int line, bool pseudo_opt, int options)
 {
     const char *err = "unknown instruction";
     if (str_to_instruction_code_map.isEmpty())
@@ -1204,7 +1204,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                     val += parse_reg_from_string(fl, &chars_taken);
                     break;
                 case 'p':
-                    val -= (inst_addr + 4);
+                    val -= (inst_addr + 4).get_raw();
                     FALLTROUGH
                 case 'o':
                 case 'n':
@@ -1242,7 +1242,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                     break;
                 case 'a':
                     shift_right += options & 0xff;
-                    val -= (inst_addr + 4) & ~(std::int64_t)0x0fffffff;
+                    val -= ((inst_addr + 4) & ~(std::int64_t)0x0fffffff).get_raw();
                     if(fl.at(0).isDigit() || (reloc == nullptr)) {
                         std::uint64_t num_val;
                         int i;
@@ -1352,9 +1352,9 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
 }
 
 ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
-                       QString str, QString &error, std::uint32_t inst_addr,
-                       RelocExpressionList *reloc, QString filename, int line,
-                       bool pseudo_opt, int options)
+                                      QString str, QString &error, Address inst_addr,
+                                      RelocExpressionList *reloc, QString filename, int line,
+                                      bool pseudo_opt, int options)
 {
     int k = 0, l;
     while (k < str.count()) {

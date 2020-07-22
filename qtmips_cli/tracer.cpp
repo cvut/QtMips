@@ -34,16 +34,17 @@
  ******************************************************************************/
 
 #include "tracer.h"
+#include "../qtmips_machine/instruction.h"
+#include "../qtmips_machine/qtmipsexception.h"
 #include <iostream>
-#include <qtmipsexception.h>
 
 using namespace std;
 using namespace machine;
 
 Tracer::Tracer(QtMipsMachine *machine) {
     this->machine = machine;
-    for (unsigned i = 0; i < 32; i++)
-        gp_regs[i] = false;
+    for (bool & gp_reg : gp_regs)
+        gp_reg = false;
     r_hi = false;
     r_lo = false;
 
@@ -102,23 +103,23 @@ void Tracer::reg_hi() {
     r_hi = true;
 }
 
-void Tracer::instruction_fetch(const Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid) {
+void Tracer::instruction_fetch(const machine::Instruction &inst, Address inst_addr, ExceptionCause excause, bool valid) {
     cout << "Fetch: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_decode(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
+void Tracer::instruction_decode(const machine::Instruction &inst, Address inst_addr, ExceptionCause excause, bool valid) {
     cout << "Decode: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_execute(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
+void Tracer::instruction_execute(const machine::Instruction &inst, Address inst_addr, ExceptionCause excause, bool valid) {
     cout << "Execute: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_memory(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
+void Tracer::instruction_memory(const machine::Instruction &inst, Address inst_addr, ExceptionCause excause, bool valid) {
     cout << "Memory: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_writeback(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
+void Tracer::instruction_writeback(const machine::Instruction &inst, Address inst_addr, ExceptionCause excause, bool valid) {
     cout << "Writeback: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
@@ -131,7 +132,7 @@ void Tracer::regs_gp_update(std::uint8_t i, std::uint32_t val) {
         cout << "GP" << dec << (unsigned)i << ":" << hex << val << endl;
 }
 
-void Tracer::regs_hi_lo_update(bool hi, std::uint32_t val) {
+void Tracer::regs_hi_lo_update(bool hi, std::uint32_t val) const {
     if (hi && r_hi)
         cout << "HI:" << hex << val << endl;
     else if (!hi && r_lo)

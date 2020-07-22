@@ -42,8 +42,8 @@
 #include <cstdint>
 #include <qvector.h>
 #include <qstring.h>
-#include <memory.h>
 #include "symboltable.h"
+#include "memory/backend/memory.h"
 
 namespace machine {
 
@@ -53,9 +53,9 @@ public:
     ProgramLoader(QString file);
     ~ProgramLoader();
 
-    void to_memory(Memory *mem); // Writes all loaded sections to memory
-    std::uint32_t end(); // Return address after which there is no more code for sure
-    std::uint32_t get_executable_entry();
+    void to_memory(Memory *mem); // Writes all loaded sections to memory TODO: really to memory ???
+    Address end(); // Return address after which there is no more code for sure
+    Address get_executable_entry();
     SymbolTable *get_symbol_table();
 private:
     int fd;
@@ -64,7 +64,7 @@ private:
     size_t n_secs; // number of sections in elf program header
     Elf32_Phdr *phdrs; // program section headers
     QVector<size_t> map; // external index to phdrs index
-    std::uint32_t executable_entry;
+    Address executable_entry;
 };
 
 }

@@ -55,7 +55,7 @@ ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObjec
     name.setPos(WIDTH/2 - name.boundingRect().width()/2, 0);
     name.setFont(font);
     font.setPointSize(FontSize::SIZE8);
-    value.setText(QString("0x") + QString::number(machine->registers()->read_pc(), 16));
+    value.setText(QString("0x") + QString::number(machine->registers()->read_pc().get_raw(), 16));
     value.setPos(1, HEIGHT - value.boundingRect().height());
     value.setFont(font);
 

@@ -136,7 +136,7 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
     const machine::Registers *regs = machine->registers();
 
     // Load values
-    labelVal(pc, regs->read_pc());
+    labelVal(pc, regs->read_pc().get_raw());
     labelVal(hi, regs->read_hi_lo(true));
     labelVal(lo, regs->read_hi_lo(false));
     for (int i = 0; i < 32; i++)

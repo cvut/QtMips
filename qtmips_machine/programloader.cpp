@@ -65,7 +65,7 @@ ProgramLoader::ProgramLoader(const char *file) {
     elf_ehdr = gelf_getehdr(this->elf, &this->hdr);
     if (!elf_ehdr)
         throw QTMIPS_EXCEPTION(Input, "Getting elf file header failed", elf_errmsg(-1));
-    executable_entry = elf_ehdr->e_entry;
+    executable_entry = Address(elf_ehdr->e_entry);
     // Check elf file format, executable expected, nothing else.
     if (this->hdr.e_type != ET_EXEC)
         throw QTMIPS_EXCEPTION(Input, "Invalid input file type", "");
@@ -104,19 +104,19 @@ ProgramLoader::~ProgramLoader() {
     close(this->fd);
 }
 
-void ProgramLoader::to_memory(Memory *mem) {
+void ProgramLoader::to_memory(Memory *mem) { // TODO Why are you writing to raw memory
     // Load program to memory (just dump it byte by byte)
     for (int i = 0; i < this->map.size(); i++) {
         std::uint32_t base_address = this->phdrs[this->map[i]].p_vaddr;
         char *f = elf_rawfile(this->elf, NULL);
         size_t phdrs_i = this->map[i];
         for (unsigned y = 0; y < this->phdrs[phdrs_i].p_filesz; y++) {
-            mem->write_byte(base_address + y, (std::uint8_t) f[this->phdrs[phdrs_i].p_offset + y]);
+            mem->write(base_address + y, BYTE, (std::uint8_t) f[this->phdrs[phdrs_i].p_offset + y]); // TODO Why not by words
         }
     }
 }
 
-std::uint32_t ProgramLoader::end() {
+Address ProgramLoader::end() {
     std::uint32_t last = 0;
     // Go trough all sections and found out last one
     for (int i = 0; i < this->map.size(); i++) {
@@ -124,10 +124,10 @@ std::uint32_t ProgramLoader::end() {
         if ((phdr->p_vaddr + phdr->p_filesz) > last)
             last = phdr->p_vaddr + phdr->p_filesz;
     }
-    return last + 0x10; // We add offset so we are sure that also pipeline is empty
+    return Address(last + 0x10); // We add offset so we are sure that also pipeline is empty TODO propagate address deeper
 }
 
-std::uint32_t ProgramLoader::get_executable_entry() {
+Address ProgramLoader::get_executable_entry() {
     return executable_entry;
 }
 

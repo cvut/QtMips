@@ -40,6 +40,7 @@
 #include <QSettings>
 #include <QTableView>
 #include <QSharedPointer>
+#include "../qtmips_machine/memory/address.h"
 
 class MemoryTableView : public QTableView
 {
@@ -52,12 +53,12 @@ public:
 
     void resizeEvent(QResizeEvent *event) override;
 signals:
-    void address_changed(std::uint32_t address);
+    void address_changed(machine::Address address);
     void adjust_scroll_pos_queue();
 public slots:
     void set_cell_size(int index);
-    void go_to_address(std::uint32_t address);
-    void focus_address(std::uint32_t address);
+    void go_to_address(machine::Address address);
+    void focus_address(machine::Address address);
     void recompute_columns();
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -65,11 +66,11 @@ private slots:
     void adjust_scroll_pos_check();
     void adjust_scroll_pos_process();
 private:
-    void addr0_save_change(std::uint32_t val);
+    void addr0_save_change(machine::Address val);
     void adjustColumnCount();
     QSettings *settings;
 
-    std::uint32_t initial_address;
+    machine::Address initial_address;
     bool adjust_scroll_pos_in_progress;
 };
 

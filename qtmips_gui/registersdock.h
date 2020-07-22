@@ -42,7 +42,7 @@
 #include <QScrollArea>
 #include <QPropertyAnimation>
 #include <QPalette>
-#include "qtmipsmachine.h"
+#include "../qtmips_machine/qtmipsmachine.h"
 #include "statictable.h"
 
 class RegistersDock : public QDockWidget {

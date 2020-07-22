@@ -40,10 +40,12 @@
 #include <cctype>
 #include <iostream>
 #include <fstream>
+#include <utility>
 #include "tracer.h"
 #include "reporter.h"
 #include "msgreport.h"
-#include "simpleasm.h"
+#include "../qtmips_asm/simpleasm.h"
+#include "../qtmips_machine/machineconfig.h"
 
 using namespace machine;
 using namespace std;
@@ -83,7 +85,7 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({"burst-time", "Memory read access time (cycles).", "BTIME"});
 }
 
-void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QString which) {
+void configure_cache(CacheConfig &cacheconf, QStringList cachearg, QString which) {
     if (cachearg.size() < 1)
         return;
     cacheconf.set_enabled(true);
@@ -98,11 +100,11 @@ void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QStrin
     }
     if (!pieces.at(0).at(0).isDigit()) {
         if (pieces.at(0).toLower() == "random")
-            cacheconf.set_replacement_policy(MachineConfigCache::RP_RAND);
+            cacheconf.set_replacement_policy(CacheConfig::RP_RAND);
         else if (pieces.at(0).toLower() == "lru")
-            cacheconf.set_replacement_policy(MachineConfigCache::RP_LRU);
+            cacheconf.set_replacement_policy(CacheConfig::RP_LRU);
         else if (pieces.at(0).toLower() == "lfu")
-            cacheconf.set_replacement_policy(MachineConfigCache::RP_LFU);
+            cacheconf.set_replacement_policy(CacheConfig::RP_LFU);
         else {
             std::cerr << "Policy for " << which.toLocal8Bit().data() << " cache is incorrect." << std::endl;
             exit(1);
@@ -122,11 +124,11 @@ void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QStrin
     }
     if (pieces.size() > 3) {
         if (pieces.at(3).toLower() == "wb")
-            cacheconf.set_write_policy(MachineConfigCache::WP_BACK);
+            cacheconf.set_write_policy(CacheConfig::WP_BACK);
         else if (pieces.at(3).toLower() == "wt" || pieces.at(3).toLower() == "wtna")
-            cacheconf.set_write_policy(MachineConfigCache::WP_THROUGH_NOALLOC);
+            cacheconf.set_write_policy(CacheConfig::WP_THROUGH_NOALLOC);
         else if (pieces.at(3).toLower() == "wta")
-            cacheconf.set_write_policy(MachineConfigCache::WP_THROUGH_ALLOC);
+            cacheconf.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
         else {
             std::cerr << "Write policy for " << which.toLocal8Bit().data() << " cache is incorrect (correct wb/wt/wtna/wta)." << std::endl;
             exit(1);
@@ -216,7 +218,7 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
         r.regs();
     if (p.isSet("dump-cache-stats"))
         r.cache_stats();
-    if (p.isSet("dump-cycles"))
+    if (p.isSet("dump-get_cycle_count"))
         r.cycles();
 
     QStringList fail = p.values("fail-match");
@@ -323,7 +325,7 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
                 cout << "cannot parse load range data." << endl;
                 exit(1);
             }
-            machine.memory_rw()->write_word(addr, val);
+            machine.memory_rw()->write(addr, WORD, val); // TODO: Is this really the right offset
             addr += 4;
         }
         in.close();
@@ -332,7 +334,7 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
 
 bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
     SymbolTableDb symtab(machine.symbol_table_rw(true));
-    machine::MemoryAccess *mem = machine.physical_address_space_rw();
+    machine::FrontendMemory *mem = machine.physical_address_space_rw();
     if (mem == nullptr) {
         return false;
     }
@@ -342,9 +344,9 @@ bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
     sasm.connect(&sasm, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
             &msgrep, SLOT(report_message(messagetype::Type,QString,int,int,QString,QString)));
 
-    sasm.setup(mem, &symtab, 0x80020000);
+    sasm.setup(mem, &symtab, 0x80020000_addr);
 
-    if (!sasm.process_file(filename))
+    if (!sasm.process_file(std::move(filename)))
         return false;
 
     return sasm.finish();

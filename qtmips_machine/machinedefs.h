@@ -37,6 +37,7 @@
 #define MACHINEDEFS_H
 
 #include <stdint.h>
+#include "memory/address.h"
 
 namespace machine {
 
@@ -141,7 +142,7 @@ enum LocationStatus {
     LOCSTAT_ILLEGAL   = 1 << 3,
 };
 
-const std::uint32_t STAGEADDR_NONE = 0xffffffff;
+const Address STAGEADDR_NONE = 0xffffffff_addr;
 
 }
 

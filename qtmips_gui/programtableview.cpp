@@ -50,15 +50,15 @@ ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super
     connect(this , SIGNAL(adjust_scroll_pos_queue()),
             this, SLOT(adjust_scroll_pos_process()), Qt::QueuedConnection);
     this->settings = settings;
-    initial_address = settings->value("ProgramViewAddr0", 0).toULongLong();
+    initial_address = machine::Address(settings->value("ProgramViewAddr0", 0).toULongLong());
     adjust_scroll_pos_in_progress = false;
     need_addr0_save = false;
     setTextElideMode(Qt::ElideNone);
 }
 
-void ProgramTableView::addr0_save_change(std::uint32_t val) {
+void ProgramTableView::addr0_save_change(machine::Address val) {
     need_addr0_save = false;
-    settings->setValue("ProgramViewAddr0", val);
+    settings->setValue("ProgramViewAddr0", qint64(val.get_raw()));
 }
 
 void ProgramTableView::adjustColumnCount() {
@@ -103,9 +103,9 @@ void ProgramTableView::adjustColumnCount() {
     totwidth += verticalHeader()->width();
     setColumnHidden(2, totwidth > width());
 
-    if (initial_address != 0) {
+    if (!initial_address.is_null()) {
         go_to_address(initial_address);
-        initial_address = 0;
+        initial_address = machine::Address::null();
     }
 }
 
@@ -118,21 +118,21 @@ void ProgramTableView::adjust_scroll_pos_check() {
 
 void ProgramTableView::adjust_scroll_pos_process() {
     adjust_scroll_pos_in_progress = false;
-    std::uint32_t address;
+    machine::Address address;
     ProgramModel *m = dynamic_cast<ProgramModel*>(model());
     if (m == nullptr)
         return;
 
     QModelIndex prev_index = currentIndex();
-    std::uint32_t row_bytes = m->cellSizeBytes();
-    std::uint32_t index0_offset = m->getIndex0Offset();
+    machine::Address row_bytes = machine::Address(m->cellSizeBytes());
+    machine::Address index0_offset = m->getIndex0Offset();
 
     do {
         int row = rowAt(0);
         int prev_row = row;
         if (row < m->rowCount() / 8) {
-            if ((row == 0) && (index0_offset < row_bytes) && (index0_offset != 0)) {
-                m->adjustRowAndOffset(row, 0);
+            if ((row == 0) && (index0_offset < row_bytes) && (!index0_offset.is_null())) {
+                m->adjustRowAndOffset(row, machine::Address::null());
             } else if (index0_offset >= row_bytes) {
                 m->get_row_address(address, row);
                 m->adjustRowAndOffset(row, address);
@@ -158,11 +158,11 @@ void ProgramTableView::adjust_scroll_pos_process() {
 
 void ProgramTableView::resizeEvent(QResizeEvent *event) {
     ProgramModel *m = dynamic_cast<ProgramModel*>(model());
-    std::uint32_t address;
+    machine::Address address;
     bool keep_row0 = false;
 
     if (m != nullptr) {
-        if (initial_address == 0) {
+        if (initial_address.is_null()) {
             keep_row0 = m->get_row_address(address, rowAt(0));
         } else {
             address = initial_address;
@@ -171,12 +171,12 @@ void ProgramTableView::resizeEvent(QResizeEvent *event) {
     Super::resizeEvent(event);
     adjustColumnCount();
     if (keep_row0) {
-        initial_address = 0;
+        initial_address = machine::Address::null();
         go_to_address(address);
     }
 }
 
-void ProgramTableView::go_to_address_priv(std::uint32_t address) {
+void ProgramTableView::go_to_address_priv(machine::Address address) {
     ProgramModel *m = dynamic_cast<ProgramModel*>(model());
     int row;
     if (m == nullptr)
@@ -190,12 +190,12 @@ void ProgramTableView::go_to_address_priv(std::uint32_t address) {
     emit m->update_all();
 }
 
-void ProgramTableView::go_to_address(std::uint32_t address) {
+void ProgramTableView::go_to_address(machine::Address address) {
     need_addr0_save = true;
     go_to_address_priv(address);
 }
 
-void ProgramTableView::focus_address(std::uint32_t address) {
+void ProgramTableView::focus_address(machine::Address address) {
     int row;
     ProgramModel *m = dynamic_cast<ProgramModel*>(model());
     if (m == nullptr)
@@ -207,7 +207,7 @@ void ProgramTableView::focus_address(std::uint32_t address) {
     setCurrentIndex(m->index(row, 1));
 }
 
-void ProgramTableView::focus_address_with_save(std::uint32_t address) {
+void ProgramTableView::focus_address_with_save(machine::Address address) {
     need_addr0_save = true;
     focus_address(address);
 }

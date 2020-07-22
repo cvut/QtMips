@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QImage>
 
-#include "lcddisplay.h"
+#include "../qtmips_machine/memory/backend/lcddisplay.h"
 
 class LcdDisplayView : public QWidget
 {

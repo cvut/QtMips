@@ -88,13 +88,13 @@ void CacheDock::setup(const machine::Cache *cache) {
         connect(cache, SIGNAL(statistics_update(uint,double,double)), this, SLOT(statistics_update(uint,double,double)));
     }
     top_form->setVisible(cache != nullptr);
-    no_cache->setVisible(!cache->config().enabled());
+    no_cache->setVisible(!cache->get_config().enabled());
 
     if (cachescene)
         delete cachescene;
     cachescene = new CacheViewScene(cache);
     graphicsview->setScene(cachescene);
-    graphicsview->setVisible(cache->config().enabled());
+    graphicsview->setVisible(cache->get_config().enabled());
 }
 
 void CacheDock::hit_update(unsigned val) {

@@ -38,6 +38,7 @@
 
 #include <QObject>
 #include <cstdint>
+#include "memory/address.h"
 
 namespace machine {
 
@@ -47,11 +48,11 @@ public:
     Registers();
     Registers(const Registers&);
 
-    std::uint32_t read_pc() const; // Return current value of program counter
-    std::uint32_t pc_inc(); // Increment program counter by four bytes
-    std::uint32_t pc_jmp(std::int32_t offset); // Relative jump from current location in program counter
-    void pc_abs_jmp(std::uint32_t address); // Absolute jump in program counter (write to pc)
-    void pc_abs_jmp_28(std::uint32_t address); // Absolute jump in current 256MB section (basically J implementation)
+    Address read_pc() const; // Return current value of program counter
+    Address pc_inc(); // Increment program counter by four bytes
+    Address pc_jmp(std::int32_t offset); // Relative jump from current location in program counter
+    void pc_abs_jmp(machine::Address address); // Absolute jump in program counter (write to pc)
+    void pc_abs_jmp_28(Address address); // Absolute jump in current 256MB section (basically J implementation)
 
     std::uint32_t read_gp(std::uint8_t i) const; // Read general-purpose register
     void write_gp(std::uint8_t i, std::uint32_t value); // Write general-purpose register
@@ -64,7 +65,7 @@ public:
     void reset(); // Reset all values to zero (except pc)
 
 signals:
-    void pc_update(std::uint32_t val);
+    void pc_update(Address val);
     void gp_update(std::uint8_t i, std::uint32_t val);
     void hi_lo_update(bool hi, std::uint32_t val);
     void gp_read(std::uint8_t i, std::uint32_t val) const;
@@ -73,9 +74,8 @@ signals:
 private:
     std::uint32_t gp[31]; // general-purpose registers ($0 is intentionally skipped)
     std::uint32_t hi, lo;
-    std::uint32_t pc; // program counter
+    Address pc; // program counter
 };
-
 }
 
 Q_DECLARE_METATYPE(machine::Registers)

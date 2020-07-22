@@ -33,33 +33,38 @@
  *
  ******************************************************************************/
 
-#ifndef SIMPLEPERIPHERAL_H
-#define SIMPLEPERIPHERAL_H
+#include "peripheral.h"
 
-#include <QObject>
-#include <QMap>
-#include <cstdint>
-#include <qtmipsexception.h>
-#include "machinedefs.h"
-#include "memory.h"
+using namespace machine;
 
-namespace machine {
-
-class SimplePeripheral : public MemoryAccess {
-    Q_OBJECT
-public:
-    SimplePeripheral();
-    ~SimplePeripheral();
-
-signals:
-    void write_notification(std::uint32_t address, std::uint32_t value);
-    void read_notification(std::uint32_t address, std::uint32_t *value) const;
-
-public:
-    bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
-};
+SimplePeripheral::SimplePeripheral() {
 
 }
 
-#endif // SIMPLEPERIPHERAL_H
+SimplePeripheral::~SimplePeripheral() {
+
+}
+
+bool SimplePeripheral::write(Offset offset, AccessSize size, AccessItem value) {
+#if 0
+    printf("SimplePeripheral::wword address 0x%08lx data 0x%08lx\n",
+           (unsigned long)address, (unsigned long)value);
+#endif
+    emit write_notification(offset, value);
+
+    return true;
+}
+
+AccessItem SimplePeripheral::read(Offset offset, AccessSize size, bool debug_read) const {
+    (void)debug_read;
+    std::uint32_t value = 0x12345678;
+#if 0
+    printf("SimplePeripheral::rword address 0x%08lx\n",
+           (unsigned long)address);
+#endif
+
+    emit read_notification(offset, &value);
+
+    return value;
+}
+

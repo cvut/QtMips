@@ -51,10 +51,10 @@
 #include "fontsize.h"
 #include "gotosymboldialog.h"
 #include "fixmatheval.h"
-#include "simpleasm.h"
 #include "extprocess.h"
 #include "savechangeddialog.h"
 #include "textsignalaction.h"
+#include "../qtmips_asm/simpleasm.h"
 
 #ifdef __EMSCRIPTEN__
 #include <QFileInfo>
@@ -954,7 +954,7 @@ void MainWindow::compile_source() {
         return;
     }
     SymbolTableDb symtab(machine->symbol_table_rw(true));
-    machine::MemoryAccess *mem = machine->physical_address_space_rw();
+    machine::FrontendMemory *mem = machine->physical_address_space_rw();
     if (mem == nullptr) {
         QMessageBox::critical(this, "QtMips Error", tr("No physical addresspace to store program."));
         return;
@@ -971,7 +971,7 @@ void MainWindow::compile_source() {
     connect(&sasm, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
             this, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)));
 
-    sasm.setup(mem, &symtab, 0x80020000);
+    sasm.setup(mem, &symtab, machine::Address(0x80020000));
 
     int ln = 1;
     for ( QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {

@@ -33,12 +33,11 @@
  *
  ******************************************************************************/
 
-#include "utils.h"
-#include "core.h"
 #include "ossyscall.h"
 #include "syscall_nr.h"
 #include "errno.h"
 #include "target_errno.h"
+#include "../qtmips_machine/utils.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -962,26 +961,26 @@ OsSyscallExceptionHandler::OsSyscallExceptionHandler(bool known_syscall_stop,
 }
 
 bool OsSyscallExceptionHandler::handle_exception(Core *core, Registers *regs,
-                            ExceptionCause excause, std::uint32_t inst_addr,
-                            std::uint32_t next_addr, std::uint32_t jump_branch_pc,
-                            bool in_delay_slot, std::uint32_t mem_ref_addr) {
+                                                 ExceptionCause excause, Address inst_addr,
+                                                 Address next_addr, Address jump_branch_pc,
+                                                 bool in_delay_slot, Address mem_ref_addr) {
     unsigned int syscall_num = regs->read_gp(2);
     const mips_syscall_desc_t *sdesc;
     std::uint32_t a1 = 0, a2 = 0, a3 = 0, a4 = 0, a5 = 0, a6 = 0, a7 = 0, a8 = 0;
-    std::uint32_t sp = regs->read_gp(29);
+    Address sp = Address(regs->read_gp(29));
     std::uint32_t result;
     int status;
 
-    MemoryAccess *mem_data = core->get_mem_data();
-    MemoryAccess *mem_program = core->get_mem_program();
+    FrontendMemory *mem_data = core->get_mem_data();
+    FrontendMemory *mem_program = core->get_mem_program();
     (void)mem_program;
 
 #if 1
     printf("Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch PC 0x%08lx "
            "in_delay_slot %d registers PC 0x%08lx mem ref 0x%08lx\n",
-           excause, (unsigned long)inst_addr, (unsigned long)next_addr,
-           (unsigned long)jump_branch_pc, (int)in_delay_slot,
-           (unsigned long)regs->read_pc(), (unsigned long)mem_ref_addr);
+           excause, (unsigned long)inst_addr.get_raw(), (unsigned long)next_addr.get_raw(),
+           (unsigned long)jump_branch_pc.get_raw(), (int)in_delay_slot,
+           (unsigned long)regs->read_pc().get_raw(), (unsigned long)mem_ref_addr.get_raw());
 #else
     (void)excause; (void)inst_addr; (void)next_addr; (void)mem_ref_addr; (void)regs;
     (void)jump_branch_pc; (void)in_delay_slot;
@@ -1040,22 +1039,24 @@ bool OsSyscallExceptionHandler::handle_exception(Core *core, Registers *regs,
     return true;
 };
 
-std::int32_t OsSyscallExceptionHandler::write_mem(machine::MemoryAccess *mem, std::uint32_t addr,
-                   const QVector<std::uint8_t> &data, std::uint32_t count) {
+std::int32_t OsSyscallExceptionHandler::write_mem(machine::FrontendMemory *mem, Address addr,
+                                                  const QVector<std::uint8_t> &data, std::uint32_t count) {
     if ((std::uint32_t)data.size() < count)
         count = data.size();
 
     for (std::uint32_t i = 0; i < count; i++) {
-        mem->write_byte(addr++, data[i]);
+        mem->write_byte(addr, data[i]);
+        addr += 1;
     }
     return count;
 }
 
-std::int32_t OsSyscallExceptionHandler::read_mem(machine::MemoryAccess *mem, std::uint32_t addr,
-                   QVector<std::uint8_t> &data, std::uint32_t count) {
+std::int32_t OsSyscallExceptionHandler::read_mem(machine::FrontendMemory *mem, Address addr,
+                                                 QVector<std::uint8_t> &data, std::uint32_t count) {
     data.resize(count);
     for (std::uint32_t i = 0; i < count; i++) {
-        data[i] = mem->read_byte(addr++);
+        data[i] = mem->read_byte(addr);
+        addr += 1;
     }
     return count;
 }
@@ -1260,9 +1261,9 @@ int OsSyscallExceptionHandler::do_sys_writev(std::uint32_t &result, Core *core,
 
     result = 0;
     int fd = a1;
-    std::uint32_t iov = a2;
+    Address iov = Address(a2);
     int iovcnt = a3;
-    MemoryAccess *mem = core->get_mem_data();
+    FrontendMemory *mem = core->get_mem_data();
     std::int32_t count;
     QVector<std::uint8_t> data;
 
@@ -1275,7 +1276,7 @@ int OsSyscallExceptionHandler::do_sys_writev(std::uint32_t &result, Core *core,
     }
 
     while (iovcnt-- > 0) {
-        std::uint32_t iov_base = mem->read_word(iov);
+        Address iov_base = Address(mem->read_word(iov));
         std::uint32_t iov_len = mem->read_word(iov + 4);
         iov += 8;
 
@@ -1305,9 +1306,9 @@ int OsSyscallExceptionHandler::do_sys_write(std::uint32_t &result, Core *core,
 
     result = 0;
     int fd = a1;
-    std::uint32_t buf = a2;
+    Address buf = Address(a2);
     int size = a3;
-    MemoryAccess *mem = core->get_mem_data();
+    FrontendMemory *mem = core->get_mem_data();
     std::int32_t count;
     QVector<std::uint8_t> data;
 
@@ -1338,9 +1339,9 @@ int OsSyscallExceptionHandler::do_sys_readv(std::uint32_t &result, Core *core,
 
     result = 0;
     int fd = a1;
-    std::uint32_t iov = a2;
+    Address iov = Address(a2);
     int iovcnt = a3;
-    MemoryAccess *mem = core->get_mem_data();
+    FrontendMemory *mem = core->get_mem_data();
     std::int32_t count;
     QVector<std::uint8_t> data;
 
@@ -1353,7 +1354,7 @@ int OsSyscallExceptionHandler::do_sys_readv(std::uint32_t &result, Core *core,
     }
 
     while (iovcnt-- > 0) {
-        std::uint32_t iov_base = mem->read_word(iov);
+        Address iov_base = Address(mem->read_word(iov));
         std::uint32_t iov_len = mem->read_word(iov + 4);
         iov += 8;
 
@@ -1383,9 +1384,9 @@ int OsSyscallExceptionHandler::do_sys_read(std::uint32_t &result, Core *core,
 
     result = 0;
     int fd = a1;
-    std::uint32_t buf = a2;
+    Address buf = Address(a2);
     int size = a3;
-    MemoryAccess *mem = core->get_mem_data();
+    FrontendMemory *mem = core->get_mem_data();
     std::int32_t count;
     QVector<std::uint8_t> data;
 
@@ -1418,17 +1419,18 @@ int OsSyscallExceptionHandler::do_sys_open(std::uint32_t &result, Core *core,
     (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
 
     result = 0;
-    std::uint32_t pathname = a1;
+    Address pathname_ptr = Address(a1);
     int flags = a2;
     int mode = a3;
     std::uint32_t ch;
-    MemoryAccess *mem = core->get_mem_data();
+    FrontendMemory *mem = core->get_mem_data();
 
     printf("sys_open filename\n");
 
     QString fname;
     while (true) {
-        ch = mem->read_byte(pathname++);
+        ch = mem->read_byte(pathname_ptr);
+        pathname_ptr += 1;
         if (ch == 0)
             break;
         fname.append(QChar(ch));
@@ -1570,13 +1572,14 @@ int OsSyscallExceptionHandler::do_spim_print_string(std::uint32_t &result, Core 
     (void)core; (void)syscall_num;
     (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
 
-    std::uint32_t str_ptr = a1;
+    Address str_ptr = Address(a1);
     QVector<std::uint8_t> data;
-    MemoryAccess *mem = core->get_mem_data();
+    FrontendMemory *mem = core->get_mem_data();
 
     while (true) {
         std::uint8_t ch;
-        ch = mem->read_byte(str_ptr++);
+        ch = mem->read_byte(str_ptr);
+        str_ptr += 1;
         if (ch == 0)
             break;
         data.append(ch);

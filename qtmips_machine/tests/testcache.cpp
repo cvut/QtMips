@@ -39,12 +39,12 @@
 using namespace machine;
 
 void MachineTests::cache_data() {
-    QTest::addColumn<MachineConfigCache>("cache_c");
+    QTest::addColumn<CacheConfig>("cache_c");
     QTest::addColumn<unsigned>("hit");
     QTest::addColumn<unsigned>("miss");
 
-    MachineConfigCache cache_c;
-    cache_c.set_write_policy(MachineConfigCache::WP_THROUGH_ALLOC);
+    CacheConfig cache_c;
+    cache_c.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
     cache_c.set_enabled(true);
     cache_c.set_sets(8);
     cache_c.set_blocks(1);
@@ -65,7 +65,7 @@ void MachineTests::cache_data() {
 }
 
 void MachineTests::cache() {
-    QFETCH(MachineConfigCache, cache_c);
+    QFETCH(CacheConfig, cache_c);
     QFETCH(unsigned, hit);
     QFETCH(unsigned, miss);
 

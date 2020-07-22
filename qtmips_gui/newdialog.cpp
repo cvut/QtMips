@@ -380,7 +380,7 @@ NewDialogCacheHandler::NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *
 	connect(ui->writeback_policy, SIGNAL(activated(int)), this, SLOT(writeback(int)));
 }
 
-void NewDialogCacheHandler::set_config(machine::MachineConfigCache *config) {
+void NewDialogCacheHandler::set_config(machine::CacheConfig *config) {
 	this->config = config;
 }
 
@@ -414,11 +414,11 @@ void NewDialogCacheHandler::degreeassociativity() {
 }
 
 void NewDialogCacheHandler::replacement(int val) {
-	config->set_replacement_policy((enum machine::MachineConfigCache::ReplacementPolicy)val);
+	config->set_replacement_policy((enum machine::CacheConfig::ReplacementPolicy)val);
 	nd->switch2custom();
 }
 
 void NewDialogCacheHandler::writeback(int val) {
-	config->set_write_policy((enum machine::MachineConfigCache::WritePolicy)val);
+	config->set_write_policy((enum machine::CacheConfig::WritePolicy)val);
 	nd->switch2custom();
 }

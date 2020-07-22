@@ -39,13 +39,13 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
-#include <qtmipsexception.h>
-#include <machineconfig.h>
-#include <registers.h>
-#include <memory.h>
-#include <core.h>
-#include <instruction.h>
-#include <alu.h>
+#include "../qtmips_machine/qtmipsexception.h"
+#include "../qtmips_machine/machineconfig.h"
+#include "../qtmips_machine/registers.h"
+#include "../qtmips_machine/memory/frontend_memory.h"
+#include "../qtmips_machine/core.h"
+#include "../qtmips_machine/instruction.h"
+#include "../qtmips_machine/alu.h"
 
 namespace osemu {
 
@@ -59,12 +59,12 @@ int name(std::uint32_t &result, machine::Core *core, \
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT
 public:
-    OsSyscallExceptionHandler(bool known_syscall_stop = false, bool unknown_syscall_stop = false,
+    explicit OsSyscallExceptionHandler(bool known_syscall_stop = false, bool unknown_syscall_stop = false,
                               QString fs_root = "");
     bool handle_exception(machine::Core *core, machine::Registers *regs,
-                          machine::ExceptionCause excause, std::uint32_t inst_addr,
-                          std::uint32_t next_addr, std::uint32_t jump_branch_pc,
-                          bool in_delay_slot, std::uint32_t mem_ref_addr);
+                          machine::ExceptionCause excause, machine::Address inst_addr,
+                          machine::Address next_addr, machine::Address jump_branch_pc,
+                          bool in_delay_slot, machine::Address mem_ref_addr) override;
     OSSYCALL_HANDLER_DECLARE(syscall_default_handler);
     OSSYCALL_HANDLER_DECLARE(do_sys_exit);
     OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
@@ -95,10 +95,10 @@ private:
         FD_INVALID = -1,
         FD_TERMINAL = -2,
     };
-    std::int32_t write_mem(machine::MemoryAccess *mem, std::uint32_t addr,
-                       const QVector<std::uint8_t> &data, std::uint32_t count);
-    std::int32_t read_mem(machine::MemoryAccess *mem, std::uint32_t addr,
-                       QVector<std::uint8_t> &data, std::uint32_t count);
+    std::int32_t write_mem(machine::FrontendMemory *mem, machine::Address addr,
+                           const QVector<std::uint8_t> &data, std::uint32_t count);
+    std::int32_t read_mem(machine::FrontendMemory *mem, machine::Address addr,
+                          QVector<std::uint8_t> &data, std::uint32_t count);
     std::int32_t write_io(int fd, const QVector<std::uint8_t> &data, std::uint32_t count);
     std::int32_t read_io(int fd, QVector<std::uint8_t> &data, std::uint32_t count,
                          bool add_nl_at_eof = false);

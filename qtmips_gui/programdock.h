@@ -40,7 +40,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include "peripheralsview.h"
-#include "qtmipsmachine.h"
+#include "../qtmips_machine/qtmipsmachine.h"
 
 class ProgramDock : public QDockWidget  {
     Q_OBJECT
@@ -55,17 +55,17 @@ public:
 signals:
     void machine_setup(machine::QtMipsMachine *machine);
     void jump_to_pc(std::uint32_t);
-    void focus_addr(std::uint32_t);
-    void focus_addr_with_save(std::uint32_t);
-    void stage_addr_changed(uint stage, std::uint32_t addr);
+    void focus_addr(machine::Address);
+    void focus_addr_with_save(machine::Address);
+    void stage_addr_changed(uint stage, machine::Address addr);
     void request_update_all();
 public slots:
     void set_follow_inst(int);
-    void fetch_inst_addr(std::uint32_t addr);
-    void decode_inst_addr(std::uint32_t addr);
-    void execute_inst_addr(std::uint32_t addr);
-    void memory_inst_addr(std::uint32_t addr);
-    void writeback_inst_addr(std::uint32_t addr);
+    void fetch_inst_addr(machine::Address addr);
+    void decode_inst_addr(machine::Address addr);
+    void execute_inst_addr(machine::Address addr);
+    void memory_inst_addr(machine::Address addr);
+    void writeback_inst_addr(machine::Address addr);
     void report_error(QString error);
 private:
     enum FollowSource {
@@ -80,7 +80,7 @@ private:
 
     void update_follow_position();
     enum FollowSource follow_source;
-    std::uint32_t follow_addr[FOLLOWSRC_COUNT];
+    machine::Address follow_addr[FOLLOWSRC_COUNT];
     QSettings *settings;
 };
 

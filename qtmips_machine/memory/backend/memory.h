@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -33,58 +35,25 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef QTMIPS_MACHINE_MEMORY_H
+#define QTMIPS_MACHINE_MEMORY_H
 
-#include <QObject>
-#include <cstdint>
-#include <qtmipsexception.h>
-#include "machinedefs.h"
+#include "backend_memory.h"
+#include "../address.h"
 
 namespace machine {
 
-// Virtual class for common memory access
-class MemoryAccess : public QObject {
-    Q_OBJECT
+
+class MemorySection : public BackendMemory {
 public:
-    // Note: hword and word methods are throwing away lowest bits so unaligned access is ignored without error.
-    bool write_byte(std::uint32_t offset, std::uint8_t value);
-    bool write_hword(std::uint32_t offset, std::uint16_t value);
-    bool write_word(std::uint32_t offset, std::uint32_t value);
-
-    std::uint8_t read_byte(std::uint32_t offset, bool debug_access = false) const;
-    std::uint16_t read_hword(std::uint32_t offset, bool debug_access = false) const;
-    std::uint32_t read_word(std::uint32_t offset, bool debug_access = false) const;
-
-    void write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value);
-    std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset) const;
-
-    virtual void sync();
-    virtual enum LocationStatus location_status(std::uint32_t offset) const;
-    virtual std::uint32_t get_change_counter() const = 0;
-
-signals:
-    void external_change_notify(const MemoryAccess *mem_access, std::uint32_t start_addr,
-                                std::uint32_t last_addr, bool external) const;
-
-protected:
-    virtual bool wword(std::uint32_t offset, std::uint32_t value) = 0;
-    virtual std::uint32_t rword(std::uint32_t offset, bool debug_access = false) const = 0;
-
-private:
-    static int sh_nth(std::uint32_t offset);
-};
-
-class MemorySection : public MemoryAccess {
-public:
-    MemorySection(std::uint32_t length);
+    explicit MemorySection(std::uint32_t length);
     MemorySection(const MemorySection&);
-    ~MemorySection();
+    ~MemorySection() override;
 
-    bool wword(std::uint32_t offset, std::uint32_t value) override;
-    std::uint32_t rword(std::uint32_t offsetbool, bool debug_access = false) const override;
-    virtual std::uint32_t get_change_counter() const override;
-    void merge(MemorySection&);
+    bool write(Offset offset, AccessSize size, AccessItem value) override;
+
+    AccessItem read(Offset offset, AccessSize size, bool debug_read) const override;
+//    void merge(MemorySection&);
 
     std::uint32_t length() const;
     const std::uint32_t* data() const;
@@ -102,19 +71,19 @@ union MemoryTree {
     MemorySection *sec;
 };
 
-class Memory : public MemoryAccess {
+class Memory : public BackendMemory {
     Q_OBJECT
 public:
     Memory();
     Memory(const Memory&);
-    ~Memory();
+    ~Memory() override;
     void reset(); // Reset whole content of memory (removes old tree and creates new one)
     void reset(const Memory&);
 
     MemorySection *get_section(std::uint32_t address, bool create) const; // returns section containing given address
-    bool wword(std::uint32_t address, std::uint32_t value) override;
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
-    virtual std::uint32_t get_change_counter() const override;
+
+    bool write(Offset offset, AccessSize size, AccessItem value) override;
+    AccessItem read(Offset offset, AccessSize size, bool debug_read = false) const override;
 
     bool operator==(const Memory&) const;
     bool operator!=(const Memory&) const;
@@ -128,14 +97,9 @@ private:
     static union MemoryTree *allocate_section_tree();
     static void free_section_tree(union MemoryTree*, size_t depth);
     static bool compare_section_tree(const union MemoryTree*, const union MemoryTree*, size_t depth);
-    static bool is_zero_section_tree(const union MemoryTree*, size_t depth);
+//    static bool is_zero_section_tree(const union MemoryTree*, size_t depth);
     static union MemoryTree *copy_section_tree(const union MemoryTree*, size_t depth);
 };
+};
 
-}
-
-Q_DECLARE_METATYPE(machine::AccessControl)
-Q_DECLARE_METATYPE(machine::Memory)
-Q_DECLARE_METATYPE(machine::LocationStatus)
-
-#endif // MEMORY_H
+#endif //QTMIPS_MACHINE_MEMORY_H

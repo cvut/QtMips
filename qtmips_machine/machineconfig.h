@@ -48,11 +48,11 @@ enum ConfigPresets {
     CP_PIPE // Full pipelined cpu
 };
 
-class MachineConfigCache {
+class CacheConfig {
 public:
-    MachineConfigCache();
-    MachineConfigCache(const MachineConfigCache *cc);
-    MachineConfigCache(const QSettings*, const QString &prefix = "");
+    CacheConfig();
+    CacheConfig(const CacheConfig *cc);
+    CacheConfig(const QSettings*, const QString &prefix = "");
 
     void store(QSettings*, const QString &prefix = "");
 
@@ -85,8 +85,8 @@ public:
     enum ReplacementPolicy replacement_policy() const;
     enum WritePolicy write_policy() const;
 
-    bool operator ==(const MachineConfigCache &c) const;
-    bool operator !=(const MachineConfigCache &c) const;
+    bool operator ==(const CacheConfig &c) const;
+    bool operator !=(const CacheConfig &c) const;
 
 private:
     bool en;
@@ -124,7 +124,7 @@ public:
     void set_memory_execute_protection(bool);
     // Protect program memory from accidental writes.
     void set_memory_write_protection(bool);
-    // Set memory access times. Passed value is in cycles.
+    // Set memory access times. Passed value is in get_cycle_count.
     void set_memory_access_time_read(unsigned);
     void set_memory_access_time_write(unsigned);
     void set_memory_access_time_burst(unsigned);
@@ -140,8 +140,8 @@ public:
     // Set path to source elf file. This has to be set before core is initialized.
     void set_elf(QString path);
     // Configure cache
-    void set_cache_program(const MachineConfigCache&);
-    void set_cache_data(const MachineConfigCache&);
+    void set_cache_program(const CacheConfig&);
+    void set_cache_data(const CacheConfig&);
 
     bool pipelined() const;
     bool delay_slot() const;
@@ -159,11 +159,11 @@ public:
     QString osemu_fs_root() const;
     bool reset_at_compile() const;
     QString elf() const;
-    const MachineConfigCache &cache_program() const;
-    const MachineConfigCache &cache_data() const;
+    const CacheConfig &cache_program() const;
+    const CacheConfig &cache_data() const;
 
-    MachineConfigCache *access_cache_program();
-    MachineConfigCache *access_cache_data();
+    CacheConfig *access_cache_program();
+    CacheConfig *access_cache_data();
 
     bool operator ==(const MachineConfig &c) const;
     bool operator !=(const MachineConfig &c) const;
@@ -177,12 +177,12 @@ private:
     bool osem_interrupt_stop, osem_exception_stop;
     bool res_at_compile;
     QString osem_fs_root;
-    QString elf_path;
-    MachineConfigCache cch_program, cch_data;
+    QString            elf_path;
+    CacheConfig cch_program, cch_data;
 };
 
 }
 
-Q_DECLARE_METATYPE(machine::MachineConfigCache)
+Q_DECLARE_METATYPE(machine::CacheConfig)
 
 #endif // MACHINECONFIG_H

@@ -159,7 +159,7 @@ void Reporter::report() {
     if (e_regs) {
         cout << "Machine state report:" << endl;
         cout << "PC:0x";
-        out_hex(cout, machine->registers()->read_pc(), 8);
+        out_hex(cout, machine->registers()->read_pc().get_raw(), 8);
         cout << endl;
         for (int i = 0; i < 32; i++) {
             cout << "R" << i << ":0x";
@@ -185,23 +185,23 @@ void Reporter::report() {
     }
     if (e_cache_stats) {
         cout << "Cache statistics report:" << endl;
-        cout << "i-cache:reads:" << machine->cache_program()->memory_reads() << endl;
-        cout << "i-cache:hit:" << machine->cache_program()->hit() << endl;
-        cout << "i-cache:miss:" << machine->cache_program()->miss() << endl;
-        cout << "i-cache:hit-rate:" << machine->cache_program()->hit_rate() << endl;
-        cout << "i-cache:stalled-cycles:" << machine->cache_program()->stalled_cycles() << endl;
-        cout << "i-cache:improved-speed:" << machine->cache_program()->speed_improvement() << endl;
-        cout << "d-cache:reads:" << machine->cache_data()->memory_reads() << endl;
-        cout << "d-cache:writes:" << machine->cache_data()->memory_writes() << endl;
-        cout << "d-cache:hit:" << machine->cache_data()->hit() << endl;
-        cout << "d-cache:miss:" << machine->cache_data()->miss() << endl;
-        cout << "d-cache:hit-rate:" << machine->cache_data()->hit_rate() << endl;
-        cout << "d-cache:stalled-cycles:" << machine->cache_data()->stalled_cycles() << endl;
-        cout << "d-cache:improved-speed:" << machine->cache_data()->speed_improvement() << endl;
+        cout << "i-cache:reads:" << machine->cache_program()->get_read_count() << endl;
+        cout << "i-cache:hit:" << machine->cache_program()->get_hit_count() << endl;
+        cout << "i-cache:miss:" << machine->cache_program()->get_miss_count() << endl;
+        cout << "i-cache:hit-rate:" << machine->cache_program()->get_hit_rate() << endl;
+        cout << "i-cache:stalled-get_cycle_count:" << machine->cache_program()->get_stall_count() << endl;
+        cout << "i-cache:improved-speed:" << machine->cache_program()->get_speed_improvement() << endl;
+        cout << "d-cache:reads:" << machine->cache_data()->get_read_count() << endl;
+        cout << "d-cache:writes:" << machine->cache_data()->get_write_count() << endl;
+        cout << "d-cache:hit:" << machine->cache_data()->get_hit_count() << endl;
+        cout << "d-cache:miss:" << machine->cache_data()->get_miss_count() << endl;
+        cout << "d-cache:hit-rate:" << machine->cache_data()->get_hit_rate() << endl;
+        cout << "d-cache:stalled-get_cycle_count:" << machine->cache_data()->get_stall_count() << endl;
+        cout << "d-cache:improved-speed:" << machine->cache_data()->get_speed_improvement() << endl;
     }
     if (e_cycles) {
-        cout << "cycles:" << machine->core()->cycles() << endl;
-        cout << "stalls:" << machine->core()->stalls() << endl;
+        cout << "get_cycle_count:" << machine->core()->get_cycle_count() << endl;
+        cout << "get_stall_count:" << machine->core()->get_stall_count() << endl;
     }
     foreach (DumpRange range, dump_ranges) {
         ofstream out;
@@ -212,7 +212,7 @@ void Reporter::report() {
             end = 0xffffffff;
         for (std::int32_t addr = start; addr < end; addr += 4) {
             out << "0x";
-            out_hex(out, machine->memory()->read_word(addr), 8);
+            out_hex(out, machine->memory()->read(addr, WORD), 8);
             out << endl;
         }
         out.close();

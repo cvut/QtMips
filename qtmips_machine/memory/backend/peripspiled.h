@@ -33,52 +33,58 @@
  *
  ******************************************************************************/
 
-#ifndef SERIALPORT_H
-#define SERIALPORT_H
+#ifndef PERIPSPILED_H
+#define PERIPSPILED_H
 
 #include <QObject>
 #include <QMap>
 #include <cstdint>
-#include <qtmipsexception.h>
-#include "peripheral.h"
+#include "../../qtmipsexception.h"
+#include "../../machinedefs.h"
+#include "backend_memory.h"
 
 namespace machine {
 
-class SerialPort : public MemoryAccess {
+class PeripSpiLed : public BackendMemory {
     Q_OBJECT
 public:
-    SerialPort();
-    ~SerialPort();
+    PeripSpiLed();
+    ~PeripSpiLed() override;
 
 signals:
-    void tx_byte(unsigned int data);
-    void rx_byte_pool(int fd, unsigned int &data, bool &available) const;
     void write_notification(std::uint32_t address, std::uint32_t value);
     void read_notification(std::uint32_t address, std::uint32_t *value) const;
-    void signal_interrupt(uint irq_level, bool active) const;
+
+    void led_line_changed(uint val) const;
+    void led_rgb1_changed(uint val) const;
+    void led_rgb2_changed(uint val) const;
 
 public slots:
-    void rx_queue_check() const;
-
+    void red_knob_update(int val);
+    void green_knob_update(int val);
+    void blue_knob_update(int val);
+    void red_knob_push(bool state);
+    void green_knob_push(bool state);
+    void blue_knob_push(bool state);
 public:
-    bool wword(std::uint32_t address, std::uint32_t value) override;
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
-    virtual std::uint32_t get_change_counter() const override;
+    bool write(Offset offset, AccessSize size, AccessItem item) override;
+    AccessItem read(Offset offset, AccessSize size, bool debug_read) const override;
+
+//    std::uint32_t read(std::uint32_t address, bool debug_access = false) const override;
+//    virtual std::uint32_t get_change_counter() const override;
 private:
-    void rx_queue_check_internal() const;
-    mutable std::uint32_t change_counter;
-    void pool_rx_byte() const;
-    void update_rx_irq() const;
-    void update_tx_irq() const;
-    mutable std::uint32_t rx_st_reg;
-    mutable std::uint32_t rx_data_reg;
-    std::uint32_t tx_st_reg;
-    std::uint8_t tx_irq_level;
-    std::uint8_t rx_irq_level;
-    mutable bool tx_irq_active;
-    mutable bool rx_irq_active;
+    void knob_update_notify(std::uint32_t val, std::uint32_t mask, int shift);
+
+//    mutable std::uint32_t change_counter;
+    std::uint32_t spiled_reg_led_line;
+    std::uint32_t spiled_reg_led_rgb1;
+    std::uint32_t spiled_reg_led_rgb2;
+    std::uint32_t spiled_reg_led_kbdwr_direct;
+
+    std::uint32_t spiled_reg_kbdrd_knobs_direct;
+    std::uint32_t spiled_reg_knobs_8bit;
 };
 
 }
 
-#endif // SERIALPORT_H
+#endif // PERIPSPILED_H

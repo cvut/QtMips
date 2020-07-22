@@ -12,8 +12,6 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
- * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
- * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -35,18 +33,34 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_NUMERIC_H
-#define QTMIPS_NUMERIC_H
+#ifndef SIMPLEPERIPHERAL_H
+#define SIMPLEPERIPHERAL_H
 
+#include <QObject>
+#include <QMap>
 #include <cstdint>
+#include "../../qtmipsexception.h"
+#include "../../machinedefs.h"
+#include "backend_memory.h"
 
-// TODO: This part is work in progress
+namespace machine {
 
-using std::size_t;
+class SimplePeripheral : public BackendMemory {
+    Q_OBJECT
+public:
+    SimplePeripheral();
+    ~SimplePeripheral() override;
 
-const size_t XLEN = 32;
+signals:
+    void write_notification(std::uint32_t address, std::uint32_t value);
+    void read_notification(std::uint32_t address, std::uint32_t *value) const;
 
-typedef uint32_t uint_xlen_t;
-typedef int32_t  int_xlen_t;
+public:
+    bool write(Offset offset, AccessSize size, AccessItem value) override;
 
-#endif //QTMIPS_NUMERIC_H
+    AccessItem read(Offset offset, AccessSize size, bool debug_read) const override;
+};
+
+}
+
+#endif // SIMPLEPERIPHERAL_H

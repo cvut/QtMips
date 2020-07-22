@@ -140,7 +140,7 @@ std::uint32_t Cop0State::read_cop0reg(enum Cop0Registers reg) const {
     return (this->*cop0reg_desc[reg].reg_read)(reg);
 }
 
-void Cop0State::write_cop0reg(enum Cop0Registers reg, std::uint32_t value) {
+void Cop0State::write_cop0reg(enum Cop0Registers reg, uint32_t value) {
     SANITY_ASSERT(reg != Unsupported && reg < COP0REGS_CNT, QString("Trying to write to cop0 register ") + QString(reg));
     (this->*cop0reg_desc[reg].reg_write)(reg, value);
 }
@@ -226,8 +226,8 @@ void Cop0State::set_status_exl(bool value) {
     emit cop0reg_update(Status, cop0reg[(int)Status]);
 }
 
-std::uint32_t Cop0State::exception_pc_address() {
-    return cop0reg[(int)EBase] + 0x180;
+Address Cop0State::exception_pc_address() {
+    return Address(cop0reg[(int)EBase] + 0x180);
 }
 
 void Cop0State::write_cop0reg_count_compare(enum Cop0Registers reg, std::uint32_t value) {
@@ -241,7 +241,7 @@ void Cop0State::update_count_and_compare_irq() {
     if (core == nullptr)
         return;
     count_orig = cop0reg[(int)Count];
-    core_cycles = core->cycles();
+    core_cycles = core->get_cycle_count();
     cop0reg[(int)Count] += core_cycles - last_core_cycles;
     last_core_cycles = core_cycles;
     emit cop0reg_update(Count, cop0reg[(int)Count]);

@@ -40,6 +40,8 @@
 #include <QString>
 #include <cstdint>
 #include <machinedefs.h>
+#include "memory/address.h"
+
 namespace machine {
 
 class Core;
@@ -85,7 +87,7 @@ public:
     void reset(); // Reset all values to zero
 
     bool core_interrupt_request();
-    std::uint32_t exception_pc_address();
+    Address exception_pc_address();
 
 signals:
     void cop0reg_update(enum Cop0Registers reg, std::uint32_t val);

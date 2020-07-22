@@ -50,7 +50,7 @@ using namespace machine;
 #define DF_MEM_ACC_BURST 0
 #define DF_ELF QString("")
 //////////////////////////////////////////////////////////////////////////////
-/// Default config of MachineConfigCache
+/// Default config of CacheConfig
 #define DFC_EN false
 #define DFC_SETS 1
 #define DFC_BLOCKS 1
@@ -59,7 +59,7 @@ using namespace machine;
 #define DFC_WRITE WP_THROUGH_NOALLOC
 //////////////////////////////////////////////////////////////////////////////
 
-MachineConfigCache::MachineConfigCache() {
+CacheConfig::CacheConfig() {
     en = DFC_EN;
     n_sets = DFC_SETS;
     n_blocks = DFC_BLOCKS;
@@ -68,7 +68,7 @@ MachineConfigCache::MachineConfigCache() {
     write_pol = DFC_WRITE;
 }
 
-MachineConfigCache::MachineConfigCache(const MachineConfigCache *cc) {
+CacheConfig::CacheConfig(const CacheConfig *cc) {
     en = cc->enabled();
     n_sets = cc->sets();
     n_blocks = cc->blocks();
@@ -79,7 +79,7 @@ MachineConfigCache::MachineConfigCache(const MachineConfigCache *cc) {
 
 #define N(STR) (prefix + QString(STR))
 
-MachineConfigCache::MachineConfigCache(const QSettings *sts, const QString &prefix) {
+CacheConfig::CacheConfig(const QSettings *sts, const QString &prefix) {
     en = sts->value(N("Enabled"), DFC_EN).toBool();
     n_sets = sts->value(N("Sets"), DFC_SETS).toUInt();
     n_blocks = sts->value(N("Blocks"), DFC_BLOCKS).toUInt();
@@ -88,7 +88,7 @@ MachineConfigCache::MachineConfigCache(const QSettings *sts, const QString &pref
     write_pol = (enum WritePolicy)sts->value(N("Write"), DFC_WRITE).toUInt();
 }
 
-void MachineConfigCache::store(QSettings *sts, const QString &prefix) {
+void CacheConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("Enabled"), enabled());
     sts->setValue(N("Sets"), sets());
     sts->setValue(N("Blocks"), blocks());
@@ -99,7 +99,7 @@ void MachineConfigCache::store(QSettings *sts, const QString &prefix) {
 
 #undef N
 
-void MachineConfigCache::preset(enum ConfigPresets p) {
+void CacheConfig::preset(enum ConfigPresets p) {
     switch (p) {
     case CP_PIPE:
     case CP_SINGLE_CACHE:
@@ -116,55 +116,55 @@ void MachineConfigCache::preset(enum ConfigPresets p) {
     }
 }
 
-void MachineConfigCache::set_enabled(bool v) {
+void CacheConfig::set_enabled(bool v) {
     en = v;
 }
 
-void MachineConfigCache::set_sets(unsigned v) {
+void CacheConfig::set_sets(unsigned v) {
     n_sets = v > 0 ? v : 1;
 }
 
-void MachineConfigCache::set_blocks(unsigned v) {
+void CacheConfig::set_blocks(unsigned v) {
     n_blocks = v > 0 ? v : 1;
 }
 
-void MachineConfigCache::set_associativity(unsigned v) {
+void CacheConfig::set_associativity(unsigned v) {
     d_associativity = v > 0 ? v : 1;
 }
 
-void MachineConfigCache::set_replacement_policy(enum ReplacementPolicy v) {
+void CacheConfig::set_replacement_policy(enum ReplacementPolicy v) {
     replac_pol = v;
 }
 
-void MachineConfigCache::set_write_policy(enum WritePolicy v) {
+void CacheConfig::set_write_policy(enum WritePolicy v) {
     write_pol = v;
 }
 
-bool MachineConfigCache::enabled() const {
+bool CacheConfig::enabled() const {
     return en;
 }
 
-unsigned MachineConfigCache::sets() const {
+unsigned CacheConfig::sets() const {
     return n_sets;
 }
 
-unsigned MachineConfigCache::blocks() const {
+unsigned CacheConfig::blocks() const {
     return n_blocks;
 }
 
-unsigned MachineConfigCache::associativity() const {
+unsigned CacheConfig::associativity() const {
     return d_associativity;
 }
 
-enum MachineConfigCache::ReplacementPolicy MachineConfigCache::replacement_policy() const {
+enum CacheConfig::ReplacementPolicy CacheConfig::replacement_policy() const {
     return replac_pol;
 }
 
-enum MachineConfigCache::WritePolicy MachineConfigCache::write_policy() const {
+enum CacheConfig::WritePolicy CacheConfig::write_policy() const {
     return write_pol;
 }
 
-bool MachineConfigCache::operator==(const MachineConfigCache &c) const {
+bool CacheConfig::operator==(const CacheConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
     return CMP(enabled) && \
             CMP(sets) && \
@@ -175,7 +175,7 @@ bool MachineConfigCache::operator==(const MachineConfigCache &c) const {
 #undef CMP
 }
 
-bool MachineConfigCache::operator!=(const MachineConfigCache &c) const {
+bool CacheConfig::operator!=(const CacheConfig &c) const {
     return !operator==(c);
 }
 
@@ -196,8 +196,8 @@ MachineConfig::MachineConfig() {
     osem_fs_root = "";
     res_at_compile = true;
     elf_path = DF_ELF;
-    cch_program = MachineConfigCache();
-    cch_data = MachineConfigCache();
+    cch_program = CacheConfig();
+    cch_data = CacheConfig();
 }
 
 MachineConfig::MachineConfig(const MachineConfig *cc) {
@@ -240,8 +240,8 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     osem_fs_root = sts->value(N("OsemuFilesystemRoot"), "").toString();
     res_at_compile = sts->value(N("ResetAtCompile"), true).toBool();
     elf_path = sts->value(N("Elf"), DF_ELF).toString();
-    cch_program = MachineConfigCache(sts, N("ProgramCache_"));
-    cch_data = MachineConfigCache(sts, N("DataCache_"));
+    cch_program = CacheConfig(sts, N("ProgramCache_"));
+    cch_data = CacheConfig(sts, N("DataCache_"));
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
@@ -370,11 +370,11 @@ void MachineConfig::set_elf(QString path) {
     elf_path = path;
 }
 
-void MachineConfig::set_cache_program(const MachineConfigCache &c) {
+void MachineConfig::set_cache_program(const CacheConfig &c) {
     cch_program = c;
 }
 
-void MachineConfig::set_cache_data(const MachineConfigCache &c) {
+void MachineConfig::set_cache_data(const CacheConfig &c) {
     cch_data = c;
 }
 
@@ -440,19 +440,19 @@ QString MachineConfig::elf() const {
     return elf_path;
 }
 
-const MachineConfigCache &MachineConfig::cache_program() const {
+const CacheConfig &MachineConfig::cache_program() const {
     return cch_program;
 }
 
-const MachineConfigCache &MachineConfig::cache_data() const {
+const CacheConfig &MachineConfig::cache_data() const {
     return cch_data;
 }
 
-MachineConfigCache *MachineConfig::access_cache_program() {
+CacheConfig *MachineConfig::access_cache_program() {
     return &cch_program;
 }
 
-MachineConfigCache *MachineConfig::access_cache_data() {
+CacheConfig *MachineConfig::access_cache_data() {
     return &cch_data;
 }
 

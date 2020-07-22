@@ -39,15 +39,16 @@
 #include <QString>
 #include <QStringList>
 #include "fixmatheval.h"
-#include "qtmipsmachine.h"
 #include "messagetype.h"
+#include "../qtmips_machine/qtmipsmachine.h"
+#include "../qtmips_machine/memory/frontend_memory.h"
 
 class SymbolTableDb : public fixmatheval::FmeSymbolDb {
 public:
-    SymbolTableDb(machine::SymbolTable *symtab);
-    virtual bool getValue(fixmatheval::FmeValue &value, QString name) override;
-    void setSymbol(QString name, std::uint32_t value, std::uint32_t size,
-              unsigned char info = 0, unsigned char other = 0);
+    explicit SymbolTableDb(machine::SymbolTable *symtab);
+    bool getValue(fixmatheval::FmeValue &value, QString name) override;
+    void setSymbol(QString name, uint32_t value, std::uint32_t size,
+                   unsigned char info = 0, unsigned char other = 0);
 private:
     machine::SymbolTable *symtab;
 };
@@ -62,13 +63,13 @@ signals:
                                    int column, QString text, QString hint);
 
 public:
-    SimpleAsm(QObject *parent = nullptr);
-    ~SimpleAsm();
+    explicit SimpleAsm(QObject *parent = nullptr);
+    ~SimpleAsm() override;
 public:
     static std::uint64_t string_to_uint64(QString str, int base,
                                           int *chars_taken = nullptr);
     void clear();
-    void setup(machine::MemoryAccess *mem, SymbolTableDb *symtab, std::uint32_t address);
+    void setup(machine::FrontendMemory *mem, SymbolTableDb *symtab, machine::Address address);
     bool process_line(QString line, QString filename = "",
                       int line_number = 0, QString *error_ptr = nullptr);
     virtual bool process_file(QString filename, QString *error_ptr = nullptr);
@@ -81,9 +82,9 @@ protected:
     SymbolTableDb *symtab;
 private:
     QStringList include_stack;
-    machine::MemoryAccess *mem;
+    machine::FrontendMemory *mem;
     machine::RelocExpressionList reloc;
-    std::uint32_t address;
+    machine::Address address;
 };
 
 #endif /*SIMPLEASM_H*/

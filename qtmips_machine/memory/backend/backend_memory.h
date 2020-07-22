@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -33,50 +35,58 @@
  *
  ******************************************************************************/
 
-#ifndef PHYSADDRSPACE_H
-#define PHYSADDRSPACE_H
+#ifndef QTMIPS_MACHINE_BACKEND_MEMORY_H
+#define QTMIPS_MACHINE_BACKEND_MEMORY_H
 
 #include <QObject>
-#include <QMap>
-#include <cstdint>
-#include <qtmipsexception.h>
-#include "machinedefs.h"
-#include "memory.h"
+#include "../access_size.h"
+
 
 namespace machine {
 
-class PhysAddrSpace : public MemoryAccess {
-    Q_OBJECT
+typedef uint64_t Offset;
+
+
+/**
+ * Interface for physical memory or periphery
+ *
+ * Properties:
+ *  - Values returned have simulated endianness
+ *  - Stored endianness is undefined
+ */
+class BackendMemory : public QObject {
+Q_OBJECT
+
 public:
-    PhysAddrSpace();
-    ~PhysAddrSpace();
+    virtual bool write(
+        Offset offset,
+        AccessSize size,
+        AccessItem value
+    ) = 0;
 
-    bool wword(std::uint32_t address, std::uint32_t value) override;
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
-    virtual std::uint32_t get_change_counter() const override;
+    virtual AccessItem read(
+        Offset offset,
+        AccessSize size,
+        bool debug_read = false
+    ) const = 0;
 
-    bool insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool move_ownership);
-    bool remove_range(MemoryAccess *mem_acces);
-    void clean_range(std::uint32_t start_addr, std::uint32_t last_addr);
-    enum LocationStatus location_status(std::uint32_t offset) const override;
-private slots:
-    void range_external_change(const MemoryAccess *mem_access, std::uint32_t start_addr,
-                               std::uint32_t last_addr, bool external);
-private:
-    class RangeDesc {
-    public:
-         RangeDesc(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool owned);
-         std::uint32_t start_addr;
-         std::uint32_t last_addr;
-         MemoryAccess *mem_acces;
-         bool owned;
-    };
-    QMap<std::uint32_t, RangeDesc *> ranges_by_addr;
-    QMap<MemoryAccess *, RangeDesc *> ranges_by_access;
-    RangeDesc *find_range(std::uint32_t address) const;
-    mutable std::uint32_t change_counter;
+
+signals:
+    /**
+     * Notify MMU about a change in managed physical memory of periphery
+     *
+     * @param mem_access    this
+     * @param start_addr    affected area start
+     * @param last_addr     affected area end
+     * @param external
+     */
+    void external_backend_change_notify(
+        const BackendMemory *mem_access,
+        std::uint32_t start_addr,
+        std::uint32_t last_addr,
+        bool external
+    ) const;
+};
 };
 
-}
-
-#endif // PHYSADDRSPACE_H
+#endif //QTMIPS_MACHINE_BACKEND_MEMORY_H

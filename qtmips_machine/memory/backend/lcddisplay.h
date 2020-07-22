@@ -33,37 +33,50 @@
  *
  ******************************************************************************/
 
-#include "peripheral.h"
+#ifndef LCDDISPLAY_H
+#define LCDDISPLAY_H
 
-using namespace machine;
+#include "../../machinedefs.h"
+#include "../../qtmipsexception.h"
+#include "backend_memory.h"
 
-SimplePeripheral::SimplePeripheral() {
+#include <QMap>
+#include <QObject>
+#include <cstdint>
+
+namespace machine {
+
+class LcdDisplay : public BackendMemory {
+    Q_OBJECT
+public:
+    LcdDisplay();
+    ~LcdDisplay() override;
+
+signals:
+    void write_notification(Offset offset, std::uint32_t value);
+    void read_notification(Offset offset, std::uint32_t *value) const;
+    void pixel_update(uint x, uint y, uint r, uint g, uint b);
+
+public:
+    bool write(Offset offset, AccessSize size, AccessItem value) override;
+
+    AccessItem read(Offset offset, AccessSize size, bool debug_read) const override;
+
+    inline uint width() { return fb_width; }
+
+    inline uint height() { return fb_height; }
+
+private:
+    mutable std::uint32_t change_counter;
+    std::uint32_t pixel_address(uint x, uint y);
+    uchar *fb_data;
+    size_t fb_size;
+    unsigned fb_bpp;
+    unsigned fb_width;
+    unsigned fb_height;
+    unsigned fb_linesize;
+};
 
 }
 
-SimplePeripheral::~SimplePeripheral() {
-
-}
-
-bool SimplePeripheral::wword(std::uint32_t address, std::uint32_t value) {
-#if 0
-    printf("SimplePeripheral::wword address 0x%08lx data 0x%08lx\n",
-           (unsigned long)address, (unsigned long)value);
-#endif
-    emit write_notification(address, value);
-
-    return true;
-}
-
-std::uint32_t SimplePeripheral::rword(std::uint32_t address, bool debug_access) const {
-    (void)debug_access;
-    std::uint32_t value = 0x12345678;
-#if 0
-    printf("SimplePeripheral::rword address 0x%08lx\n",
-           (unsigned long)address);
-#endif
-
-    emit read_notification(address, &value);
-
-    return value;
-}
+#endif // LCDDISPLAY_H

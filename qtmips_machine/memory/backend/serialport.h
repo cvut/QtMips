@@ -33,46 +33,53 @@
  *
  ******************************************************************************/
 
-#ifndef PROGRAMTABLEVIEW_H
-#define PROGRAMTABLEVIEW_H
+#ifndef SERIALPORT_H
+#define SERIALPORT_H
 
+#include "peripheral.h"
+
+#include <QMap>
 #include <QObject>
-#include <QSettings>
-#include <QTableView>
-#include <QSharedPointer>
-#include "../qtmips_machine/memory/address.h"
+#include <cstdint>
+#include "../../qtmipsexception.h"
+#include "backend_memory.h"
 
-class ProgramTableView : public QTableView
-{
+namespace machine {
+
+class SerialPort : public BackendMemory {
     Q_OBJECT
+public:
+    SerialPort();
+    ~SerialPort() override;
 
-    using Super = QTableView;
+signals:
+    void tx_byte(unsigned int data);
+    void rx_byte_pool(int fd, unsigned int &data, bool &available) const;
+    void write_notification(std::uint32_t address, std::uint32_t value);
+    void read_notification(std::uint32_t address, std::uint32_t *value) const;
+    void signal_interrupt(uint irq_level, bool active) const;
+
+public slots:
+    void rx_queue_check() const;
 
 public:
-    ProgramTableView(QWidget *parent, QSettings *settings);
+    bool write(Offset offset, AccessSize size, AccessItem value) override;
+    AccessItem read(Offset offset, AccessSize size, bool debug_read) const override;
 
-    void resizeEvent(QResizeEvent *event) override;
-signals:
-    void address_changed(machine::Address address);
-    void adjust_scroll_pos_queue();
-public slots:
-    void go_to_address(machine::Address address);
-    void focus_address(machine::Address address);
-    void focus_address_with_save(machine::Address address);
-protected:
-    void keyPressEvent(QKeyEvent *event) override;
-private slots:
-    void adjust_scroll_pos_check();
-    void adjust_scroll_pos_process();
 private:
-    void go_to_address_priv(machine::Address address);
-    void addr0_save_change(machine::Address val);
-    void adjustColumnCount();
-    QSettings *settings;
-
-    machine::Address initial_address;
-    bool adjust_scroll_pos_in_progress;
-    bool need_addr0_save;
+    void rx_queue_check_internal() const;
+    void pool_rx_byte() const;
+    void update_rx_irq() const;
+    void update_tx_irq() const;
+    mutable std::uint32_t rx_st_reg;
+    mutable std::uint32_t rx_data_reg;
+    std::uint32_t tx_st_reg;
+    std::uint8_t tx_irq_level;
+    std::uint8_t rx_irq_level;
+    mutable bool tx_irq_active;
+    mutable bool rx_irq_active;
 };
 
-#endif // PROGRAMTABLEVIEW_H
+}
+
+#endif // SERIALPORT_H

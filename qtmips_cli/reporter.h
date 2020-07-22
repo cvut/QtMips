@@ -40,7 +40,7 @@
 #include <QVector>
 #include <QString>
 #include <QCoreApplication>
-#include "qtmipsmachine.h"
+#include "../qtmips_machine/qtmipsmachine.h"
 
 class Reporter : QObject {
     Q_OBJECT

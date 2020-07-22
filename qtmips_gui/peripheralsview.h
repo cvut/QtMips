@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "peripspiled.h"
+#include "../qtmips_machine/memory/backend/peripspiled.h"
 
 namespace Ui {
 class PeripheralsView;

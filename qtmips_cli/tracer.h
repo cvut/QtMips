@@ -37,7 +37,9 @@
 #define TRACER_H
 
 #include <QObject>
-#include "qtmipsmachine.h"
+#include "../qtmips_machine/qtmipsmachine.h"
+#include "../qtmips_machine/memory/address.h"
+#include "../qtmips_machine/instruction.h"
 
 class Tracer : public QObject {
     Q_OBJECT
@@ -57,15 +59,15 @@ public:
     void reg_hi();
 
 private slots:
-    void instruction_fetch(const machine::Instruction &inst, uint32_t inst_addr, machine::ExceptionCause excause, bool valid);
-    void instruction_decode(const machine::Instruction &inst, uint32_t inst_addr, machine::ExceptionCause excause, bool valid);
-    void instruction_execute(const machine::Instruction &inst, uint32_t inst_addr, machine::ExceptionCause excause, bool valid);
-    void instruction_memory(const machine::Instruction &inst, uint32_t inst_addr, machine::ExceptionCause excause, bool valid);
-    void instruction_writeback(const machine::Instruction &inst, uint32_t inst_addr, machine::ExceptionCause excause, bool valid);
+    void instruction_fetch(const machine::Instruction &inst, machine::Address inst_addr, machine::ExceptionCause excause, bool valid);
+    void instruction_decode(const machine::Instruction &inst, machine::Address inst_addr, machine::ExceptionCause excause, bool valid);
+    void instruction_execute(const machine::Instruction &inst, machine::Address inst_addr, machine::ExceptionCause excause, bool valid);
+    void instruction_memory(const machine::Instruction &inst, machine::Address inst_addr, machine::ExceptionCause excause, bool valid);
+    void instruction_writeback(const machine::Instruction &inst, machine::Address inst_addr, machine::ExceptionCause excause, bool valid);
 
     void regs_pc_update(std::uint32_t val);
     void regs_gp_update(std::uint8_t i, std::uint32_t val);
-    void regs_hi_lo_update(bool hi, std::uint32_t val);
+    void regs_hi_lo_update(bool hi, std::uint32_t val) const;
 
 private:
     machine::QtMipsMachine *machine;

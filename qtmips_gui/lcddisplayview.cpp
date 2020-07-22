@@ -1,7 +1,6 @@
 #include <QPainter>
 #include <QPaintEvent>
 #include <QStyle>
-#include "lcddisplay.h"
 #include "lcddisplayview.h"
 
 LcdDisplayView::LcdDisplayView(QWidget *parent) : Super(parent) {

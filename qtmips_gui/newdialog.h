@@ -42,7 +42,7 @@
 #include <QMessageBox>
 #include "ui_NewDialog.h"
 #include "ui_NewDialogCache.h"
-#include "machineconfig.h"
+#include "../qtmips_machine/machineconfig.h"
 
 class NewDialogCacheHandler;
 
@@ -100,7 +100,7 @@ class NewDialogCacheHandler : QObject {
 public:
 	NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
 
-    void set_config(machine::MachineConfigCache *config);
+    void set_config(machine::CacheConfig *config);
 
     void config_gui();
 
@@ -115,7 +115,7 @@ private slots:
 private:
 	NewDialog *nd;
 	Ui::NewDialogCache *ui;
-	machine::MachineConfigCache *config;
+	machine::CacheConfig *config;
 };
 
 #endif // NEWDIALOG_H

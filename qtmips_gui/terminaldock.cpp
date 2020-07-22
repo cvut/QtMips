@@ -37,8 +37,8 @@
 #include <QTextBlock>
 #include <QTextCursor>
 
-#include "serialport.h"
 #include "terminaldock.h"
+#include "../qtmips_machine/memory/backend/serialport.h"
 
 TerminalDock::TerminalDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
     (void)settings;

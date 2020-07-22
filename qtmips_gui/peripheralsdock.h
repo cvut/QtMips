@@ -40,9 +40,9 @@
 #include <QLabel>
 #include <QFormLayout>
 #include <peripheralsview.h>
-#include "peripspiled.h"
-#include "peripheral.h"
-#include "qtmipsmachine.h"
+#include "../qtmips_machine/memory/backend/peripspiled.h"
+#include "../qtmips_machine/memory/backend/peripheral.h"
+#include "../qtmips_machine/qtmipsmachine.h"
 
 class PeripheralsDock : public QDockWidget {
     Q_OBJECT

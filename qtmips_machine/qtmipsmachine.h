@@ -42,14 +42,14 @@
 #include <qtmipsexception.h>
 #include <machineconfig.h>
 #include <registers.h>
-#include <memory.h>
 #include <core.h>
-#include <cache.h>
-#include <physaddrspace.h>
-#include <peripheral.h>
-#include <serialport.h>
-#include <peripspiled.h>
-#include <lcddisplay.h>
+#include "memory/cache.h"
+#include "memory/mmu.h"
+#include "memory/backend/peripheral.h"
+#include "memory/backend/serialport.h"
+#include "memory/backend/peripspiled.h"
+#include "memory/backend/lcddisplay.h"
+#include "memory/backend/memory.h"
 #include <symboltable.h>
 
 namespace machine {
@@ -71,8 +71,8 @@ public:
     const Cache *cache_data();
     Cache *cache_data_rw();
     void cache_sync();
-    const  PhysAddrSpace *physical_address_space();
-    PhysAddrSpace *physical_address_space_rw();
+    const  MMU *physical_address_space();
+    MMU *physical_address_space_rw();
     SerialPort *serial_port();
     PeripSpiLed *peripheral_spi_led();
     LcdDisplay *peripheral_lcd_display();
@@ -96,12 +96,13 @@ public:
     bool exited();
 
     void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
-    bool addressapce_insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr,
-                                  std::uint32_t last_addr, bool move_ownership);
+    bool addressapce_insert_range(
+        BackendMemory *mem_acces, Address start_addr,
+        Address last_addr, bool move_ownership);
 
-    void insert_hwbreak(std::uint32_t address);
-    void remove_hwbreak(std::uint32_t address);
-    bool is_hwbreak(std::uint32_t address);
+    void insert_hwbreak(Address address);
+    void remove_hwbreak(Address address);
+    bool is_hwbreak(Address address);
     void set_stop_on_exception(enum ExceptionCause excause, bool value);
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
@@ -131,7 +132,7 @@ private:
 
     Registers *regs;
     Memory *mem, *mem_program_only;
-    PhysAddrSpace *physaddrspace;
+    MMU *physaddrspace;
     SerialPort *ser_port;
     PeripSpiLed *perip_spi_led;
     LcdDisplay *perip_lcd_display;
@@ -143,7 +144,7 @@ private:
     unsigned int time_chunk;
 
     SymbolTable *symtab;
-    std::uint32_t program_end;
+    Address program_end;
     enum Status stat;
     void set_status(enum Status st);
 };

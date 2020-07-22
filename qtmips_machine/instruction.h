@@ -77,9 +77,11 @@ enum InstructionFlags {
 };
 
 struct RelocExpression {
-    inline RelocExpression(std::int32_t location, QString expression, std::int64_t offset, std::int64_t min,
-                           std::int64_t max, unsigned lsb_bit, unsigned bits, unsigned shift,
-                           QString filename, int line, int options) {
+    // TODO is location a address
+    inline RelocExpression(
+        Address location, QString expression, std::int64_t offset, std::int64_t min,
+        std::int64_t max, unsigned lsb_bit, unsigned bits, unsigned shift,
+        QString filename, int line, int options) {
         this->location = location;
         this->expression = expression;
         this->offset = offset;
@@ -92,7 +94,7 @@ struct RelocExpression {
         this->line = line;
         this->options = options;
     }
-    std::int32_t  location;
+    Address       location;
     QString       expression;
     std::int64_t  offset;
     std::int64_t  min;
@@ -110,10 +112,10 @@ typedef QVector<RelocExpression *> RelocExpressionList;
 class Instruction {
 public:
     Instruction();
-    Instruction(std::uint32_t inst);
+    explicit Instruction(std::uint32_t inst);
     Instruction(std::uint8_t opcode, std::uint8_t rs, std::uint8_t rt, std::uint8_t rd, std::uint8_t shamt, std::uint8_t funct); // Type R
     Instruction(std::uint8_t opcode, std::uint8_t rs, std::uint8_t rt, std::uint16_t immediate); // Type I
-    Instruction(std::uint8_t opcode, std::uint32_t address); // Type J
+    Instruction(std::uint8_t opcode, Address address); // Type J
     Instruction(const Instruction&);
 
     enum Type {
@@ -131,7 +133,7 @@ public:
     std::uint8_t funct() const;
     std::uint8_t cop0sel() const;
     std::uint16_t immediate() const;
-    std::uint32_t address() const;
+    Address address() const;
     std::uint32_t data() const;
     enum Type type() const;
     enum InstructionFlags flags() const;
@@ -148,18 +150,18 @@ public:
     bool operator!=(const Instruction &c) const;
     Instruction &operator=(const Instruction &c);
 
-    QString to_str(std::int32_t inst_addr = 0) const;
+    QString to_str(Address inst_addr = Address::null()) const;
 
     static ssize_t code_from_string(std::uint32_t *code, size_t buffsize,
-                           QString inst_base, QStringList &inst_fields, QString &error,
-                           std::uint32_t inst_addr = 0,
-                           RelocExpressionList *reloc = nullptr,
-                           QString filename = "", int line = 0, bool pseudo_opt = false, int options = 0);
+                                    QString inst_base, QStringList &inst_fields, QString &error,
+                                    Address inst_addr = Address::null(),
+                                    RelocExpressionList *reloc = nullptr,
+                                    QString filename = "", int line = 0, bool pseudo_opt = false, int options = 0);
 
     static ssize_t code_from_string(std::uint32_t *code, size_t buffsize,
-                           QString str, QString &error, std::uint32_t inst_addr = 0,
-                           RelocExpressionList *reloc = nullptr, QString filename = "",
-                           int line = 0, bool pseudo_opt = false, int options = 0);
+                                    QString str, QString &error, Address inst_addr = Address::null(),
+                                    RelocExpressionList *reloc = nullptr, QString filename = "",
+                                    int line = 0, bool pseudo_opt = false, int options = 0);
 
     bool update(std::int64_t val, RelocExpression *relocexp);
 

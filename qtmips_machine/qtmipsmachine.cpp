@@ -41,7 +41,7 @@ using namespace machine;
 
 QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab, bool load_executable) :
                              QObject(), mcnf(&cc) {
-    MemoryAccess *cpu_mem;
+    FrontendMemory *cpu_mem;
     stat = ST_READY;
     symtab = nullptr;
 
@@ -53,30 +53,30 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab, bool loa
         if (load_symtab)
             symtab = program.get_symbol_table();
         program_end = program.end();
-        if (program.get_executable_entry())
+        if (program.get_executable_entry() != 0x0_addr)
             regs->pc_abs_jmp(program.get_executable_entry());
         mem = new Memory(*mem_program_only);
     } else {
-        program_end = 0xf0000000;
+        program_end = 0xf0000000_addr;
         mem_program_only = nullptr;
         mem = new Memory();
     }
 
-    physaddrspace = new PhysAddrSpace();
-    physaddrspace->insert_range(mem, 0x00000000, 0xefffffff, false);
+    physaddrspace = new MMU();
+    physaddrspace->insert_range(mem, 0x00000000_addr, 0xefffffff_addr, false);
     cpu_mem = physaddrspace;
 
     ser_port = new SerialPort();
-    addressapce_insert_range(ser_port, 0xffffc000, 0xffffc03f, true);
-    addressapce_insert_range(ser_port, 0xffff0000, 0xffff003f, false);
+    addressapce_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
+    addressapce_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
     connect(ser_port, SIGNAL(signal_interrupt(uint,bool)),
             this, SIGNAL(set_interrupt_signal(uint,bool)));
 
     perip_spi_led = new PeripSpiLed();
-    addressapce_insert_range(perip_spi_led, 0xffffc100, 0xffffc1ff, true);
+    addressapce_insert_range(perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
 
     perip_lcd_display = new LcdDisplay();
-    addressapce_insert_range(perip_lcd_display, 0xffe00000, 0xffe4afff, true);
+    addressapce_insert_range(perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
 
     cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(),
                             cc.memory_access_time_write(), cc.memory_access_time_burst());
@@ -193,11 +193,11 @@ void QtMipsMachine::cache_sync() {
         cch_data->sync();
 }
 
-const PhysAddrSpace *QtMipsMachine::physical_address_space() {
+const MMU *QtMipsMachine::physical_address_space() {
     return physaddrspace;
 }
 
-PhysAddrSpace *QtMipsMachine::physical_address_space_rw() {
+MMU *QtMipsMachine::physical_address_space_rw() {
     return physaddrspace;
 }
 
@@ -333,26 +333,29 @@ void QtMipsMachine::register_exception_handler(ExceptionCause excause,
         cr->register_exception_handler(excause, exhandler);
 }
 
-bool QtMipsMachine::addressapce_insert_range(MemoryAccess *mem_acces,
-                        std::uint32_t start_addr, std::uint32_t last_addr,
-                        bool move_ownership) {
+bool QtMipsMachine::addressapce_insert_range( // TODO why does this even exist
+    BackendMemory *mem_acces,
+    Address start_addr,
+    Address last_addr,
+    bool move_ownership
+) {
     if (physaddrspace == nullptr)
         return false;
     return physaddrspace->insert_range(mem_acces, start_addr, last_addr,
                                        move_ownership);
 }
 
-void QtMipsMachine::insert_hwbreak(std::uint32_t address) {
+void QtMipsMachine::insert_hwbreak(Address address) {
     if (cr != nullptr)
         cr->insert_hwbreak(address);
 }
 
-void QtMipsMachine::remove_hwbreak(std::uint32_t address) {
+void QtMipsMachine::remove_hwbreak(Address address) {
     if (cr != nullptr)
         cr->remove_hwbreak(address);
 }
 
-bool QtMipsMachine::is_hwbreak(std::uint32_t address) {
+bool QtMipsMachine::is_hwbreak(Address address) {
     if (cr != nullptr)
         return cr->is_hwbreak(address);
     return false;

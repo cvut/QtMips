@@ -46,7 +46,7 @@ using namespace machine;
 #define SPILED_REG_KNOBS_8BIT_o         0x024
 
 PeripSpiLed::PeripSpiLed() {
-    change_counter = 0;
+//    change_counter = 0;
 
     spiled_reg_led_line = 0;
     spiled_reg_led_rgb1 = 0;
@@ -61,47 +61,51 @@ PeripSpiLed::~PeripSpiLed() {
 
 }
 
-bool PeripSpiLed::wword(std::uint32_t address, std::uint32_t value) {
+bool PeripSpiLed::write(Offset offset, AccessSize size, AccessItem item) {
     bool changed = false;
 #if 0
     printf("PeripSpiLed::wword address 0x%08lx data 0x%08lx\n",
            (unsigned long)address, (unsigned long)value);
 #endif
-    switch (address & ~3) {
+    switch (offset & ~3) {
     case  SPILED_REG_LED_LINE_o:
-        if (spiled_reg_led_line == value)
+        if (spiled_reg_led_line == size)
             break;
-        spiled_reg_led_line = value;
-        emit led_line_changed(value);
+        spiled_reg_led_line = size;
+        emit led_line_changed(size);
         break;
     case  SPILED_REG_LED_RGB1_o:
-        if (spiled_reg_led_rgb1 == value)
+        if (spiled_reg_led_rgb1 == size)
             break;
-        spiled_reg_led_rgb1 = value;
-        emit led_rgb1_changed(value);
+        spiled_reg_led_rgb1 = size;
+        emit led_rgb1_changed(size);
         break;
     case  SPILED_REG_LED_RGB2_o:
-        if (spiled_reg_led_rgb2 == value)
+        if (spiled_reg_led_rgb2 == size)
             break;
-        spiled_reg_led_rgb2 = value;
-        emit led_rgb2_changed(value);
+        spiled_reg_led_rgb2 = size;
+        emit led_rgb2_changed(size);
         break;
     default:
         break;
     }
 
-    emit write_notification(address, value);
+    emit write_notification(offset, size);
 
     if (changed)
-        change_counter++;
+//        change_counter++;
     return changed;
 }
 
-std::uint32_t PeripSpiLed::rword(std::uint32_t address, bool debug_access) const {
-    (void)debug_access;
+AccessItem PeripSpiLed::read(
+    Offset offset,
+    AccessSize size,
+    bool debug_read
+) const {
+    (void)debug_read;
     std::uint32_t value = 0x00000000;
 
-    switch (address & ~3) {
+    switch (offset & ~3) {
     case  SPILED_REG_LED_LINE_o:
         value = spiled_reg_led_line;
         break;
@@ -124,7 +128,7 @@ std::uint32_t PeripSpiLed::rword(std::uint32_t address, bool debug_access) const
         break;
     }
 
-    emit read_notification(address, &value);
+    emit read_notification(offset, &value);
 
 #if 0
     printf("PeripSpiLed::rword address 0x%08lx value 0x%08lx\n",
@@ -134,9 +138,9 @@ std::uint32_t PeripSpiLed::rword(std::uint32_t address, bool debug_access) const
     return value;
 }
 
-std::uint32_t PeripSpiLed::get_change_counter() const {
-    return change_counter;
-}
+//std::uint32_t PeripSpiLed::get_change_counter() const {
+//    return change_counter;
+//}
 
 void PeripSpiLed::knob_update_notify(std::uint32_t val, std::uint32_t mask, int shift) {
     mask <<= shift;
@@ -145,8 +149,8 @@ void PeripSpiLed::knob_update_notify(std::uint32_t val, std::uint32_t mask, int 
         return;
     spiled_reg_knobs_8bit &= ~mask;
     spiled_reg_knobs_8bit |= val;
-    change_counter++;
-    emit external_change_notify(this, SPILED_REG_KNOBS_8BIT_o,
+//    change_counter++;
+    emit external_backend_change_notify(this, SPILED_REG_KNOBS_8BIT_o,
                                 SPILED_REG_KNOBS_8BIT_o + 3, true);
 }
 
@@ -173,3 +177,4 @@ void PeripSpiLed::green_knob_push(bool state) {
 void PeripSpiLed::blue_knob_push(bool state) {
     knob_update_notify(state? 1: 0, 1, 24);
 }
+

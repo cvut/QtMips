@@ -38,8 +38,9 @@
 
 #include <QGraphicsObject>
 #include <QPainter>
-#include "qtmipsmachine.h"
 #include "connection.h"
+#include "../../qtmips_machine/qtmipsmachine.h"
+#include "../../qtmips_machine/memory/address.h"
 
 namespace coreview {
 
@@ -58,7 +59,7 @@ public:
 
 signals:
     void open_program();
-    void jump_to_pc(std::uint32_t addr);
+    void jump_to_pc(machine::Address addr);
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;

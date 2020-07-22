@@ -51,7 +51,7 @@ public:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public slots:
-    void instruction_update(const machine::Instruction &i, std::uint32_t inst_addr,
+    void instruction_update(const machine::Instruction &i, machine::Address inst_addr,
                             machine::ExceptionCause excause, bool valid);
 
 private:

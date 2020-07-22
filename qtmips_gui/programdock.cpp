@@ -56,8 +56,8 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
     follow_source = (enum FollowSource)
             settings->value("ProgramViewFollowSource", FOLLOWSRC_FETCH).toInt();
 
-    for (int i = 0; i < FOLLOWSRC_COUNT; i++)
-        follow_addr[i] = 0;
+    for (auto & i : follow_addr)
+        i = machine::Address(0);
 
     QWidget *content = new QWidget();
 
@@ -110,7 +110,7 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {
-    std::uint32_t pc;
+    machine::Address pc;
     emit machine_setup(machine);
     if (machine == nullptr)
         return;
@@ -126,7 +126,7 @@ void ProgramDock::set_follow_inst(int follow) {
     update_follow_position();
 }
 
-void ProgramDock::fetch_inst_addr(std::uint32_t addr) {
+void ProgramDock::fetch_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE)
         follow_addr[FOLLOWSRC_FETCH] = addr;
     emit stage_addr_changed(ProgramModel::STAGEADDR_FETCH, addr);
@@ -134,7 +134,7 @@ void ProgramDock::fetch_inst_addr(std::uint32_t addr) {
         update_follow_position();
 }
 
-void ProgramDock::decode_inst_addr(std::uint32_t addr) {
+void ProgramDock::decode_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE)
         follow_addr[FOLLOWSRC_DECODE] = addr;
     emit stage_addr_changed(ProgramModel::STAGEADDR_DECODE, addr);
@@ -142,7 +142,7 @@ void ProgramDock::decode_inst_addr(std::uint32_t addr) {
         update_follow_position();
 }
 
-void ProgramDock::execute_inst_addr(std::uint32_t addr) {
+void ProgramDock::execute_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE)
         follow_addr[FOLLOWSRC_EXECUTE] = addr;
     emit stage_addr_changed(ProgramModel::STAGEADDR_EXECUTE, addr);
@@ -150,7 +150,7 @@ void ProgramDock::execute_inst_addr(std::uint32_t addr) {
         update_follow_position();
 }
 
-void ProgramDock::memory_inst_addr(std::uint32_t addr) {
+void ProgramDock::memory_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE)
         follow_addr[FOLLOWSRC_MEMORY] = addr;
     emit stage_addr_changed(ProgramModel::STAGEADDR_MEMORY, addr);
@@ -158,7 +158,7 @@ void ProgramDock::memory_inst_addr(std::uint32_t addr) {
         update_follow_position();
 }
 
-void ProgramDock::writeback_inst_addr(std::uint32_t addr) {
+void ProgramDock::writeback_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE)
         follow_addr[FOLLOWSRC_WRITEBACK] = addr;
     emit stage_addr_changed(ProgramModel::STAGEADDR_WRITEBACK, addr);

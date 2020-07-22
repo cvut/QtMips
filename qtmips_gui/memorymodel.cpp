@@ -41,7 +41,7 @@ MemoryModel::MemoryModel(QObject *parent)
     : Super(parent), data_font("Monospace") {
     cell_size = CELLSIZE_WORD;
     cells_per_row = 1;
-    index0_offset = 0;
+    index0_offset = machine::Address::null();
     data_font.setStyleHint(QFont::TypeWriter);
     machine = nullptr;
     memory_change_counter = 0;
@@ -49,20 +49,22 @@ MemoryModel::MemoryModel(QObject *parent)
     access_through_cache = 0;
 }
 
-const machine::MemoryAccess *MemoryModel::mem_access() const {
+const machine::FrontendMemory *MemoryModel::mem_access() const {
     if (machine == nullptr)
         return nullptr;
     if (machine->physical_address_space() != nullptr)
         return machine->physical_address_space();
-    return machine->memory();
+//    return machine->memory(); // TODO is this a problem?
+    throw std::logic_error("No memory available on machine");
 }
 
-machine::MemoryAccess *MemoryModel::mem_access_rw() const {
+machine::FrontendMemory *MemoryModel::mem_access_rw() const {
     if (machine == nullptr)
         return nullptr;
     if (machine->physical_address_space_rw() != nullptr)
         return machine->physical_address_space_rw();
-    return machine->memory_rw();
+//    return machine->memory_rw(); // TODO can delete?
+    throw std::logic_error("No memory available on machine");
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
@@ -95,13 +97,13 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
         QString s, t;
-        std::uint32_t address;
+        machine::Address address;
         std::uint32_t data;
-        const machine::MemoryAccess *mem;
+        const machine::FrontendMemory *mem;
         if (!get_row_address(address, index.row()))
             return QString("");
         if (index.column() == 0) {
-            t = QString::number(address, 16);
+            t = QString::number(address.get_raw(), 16);
             s.fill('0', 8 - t.count());
             return "0x" + s + t.toUpper();
         }
@@ -144,7 +146,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         return t;
     }
     if (role == Qt::BackgroundRole) {
-        std::uint32_t address;
+        machine::Address address;
         if (!get_row_address(address, index.row()) ||
             machine == nullptr || index.column() == 0)
             return QVariant();
@@ -172,7 +174,7 @@ void MemoryModel::setup(machine::QtMipsMachine *machine) {
     if (machine != nullptr)
         connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
     if (mem_access() != nullptr)
-        connect(mem_access(), SIGNAL(external_change_notify(const MemoryAccess*,std::uint32_t,std::uint32_t,bool)),
+        connect(mem_access(), SIGNAL(external_change_notify(const FrontendMemory*,std::uint32_t,std::uint32_t,bool)),
                 this, SLOT(check_for_updates()));
     emit update_all();
     emit setup_done();
@@ -187,13 +189,13 @@ void MemoryModel::setCellsPerRow(unsigned int cells) {
 void MemoryModel::set_cell_size(int index) {
     beginResetModel();
     cell_size = (enum MemoryCellSize)index;
-    index0_offset -= index0_offset % cellSizeBytes();
+    index0_offset -= index0_offset.get_raw() % cellSizeBytes();
     endResetModel();
     emit cell_size_changed();
 }
 
 void MemoryModel::update_all() {
-    const machine::MemoryAccess *mem;
+    const machine::FrontendMemory *mem;
     mem = mem_access();
     if (mem != nullptr) {
         memory_change_counter = mem->get_change_counter();
@@ -205,7 +207,7 @@ void MemoryModel::update_all() {
 
 void MemoryModel::check_for_updates() {
     bool need_update = false;
-    const machine::MemoryAccess *mem;
+    const machine::FrontendMemory *mem;
     mem = mem_access();
     if (mem == nullptr)
         return;
@@ -221,15 +223,15 @@ void MemoryModel::check_for_updates() {
     update_all();
 }
 
-bool MemoryModel::adjustRowAndOffset(int &row, std::uint32_t address) {
+bool MemoryModel::adjustRowAndOffset(int &row, machine::Address address) {
     row = rowCount() / 2;
-    address -= address % cellSizeBytes();
+    address -= address.get_raw() % cellSizeBytes();
     std::uint32_t row_bytes = cells_per_row * cellSizeBytes();
     std::uint32_t diff = row * row_bytes;
-    if (diff > address) {
-        row = address / row_bytes;
+    if (machine::Address(diff) > address) {
+        row = address.get_raw() / row_bytes;
         if (row == 0) {
-            index0_offset = 0;
+            index0_offset = machine::Address::null();
         } else {
            index0_offset = address - row * row_bytes;
         }
@@ -255,8 +257,8 @@ bool MemoryModel::setData(const QModelIndex & index, const QVariant & value, int
     if (role == Qt::EditRole)
     {
         bool ok;
-        std::uint32_t address;
-        machine::MemoryAccess *mem;
+        machine::Address address;
+        machine::FrontendMemory *mem;
         std::uint32_t data = value.toString().toULong(&ok, 16);
         if (!ok)
             return false;
