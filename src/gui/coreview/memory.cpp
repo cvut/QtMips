@@ -38,8 +38,6 @@
 #include "coreview_colors.h"
 #include "fontsize.h"
 
-#include <cmath>
-
 using namespace coreview;
 
 //////////////////////
