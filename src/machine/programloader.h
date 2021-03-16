@@ -41,7 +41,6 @@
 
 #include <QFile>
 #include <cstdint>
-#include <elf.h>
 #include <gelf.h>
 #include <qstring.h>
 #include <qvector.h>
