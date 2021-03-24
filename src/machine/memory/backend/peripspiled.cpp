@@ -37,7 +37,7 @@
 
 #include "memory/backend/peripspiled.h"
 
-#include "memory/endian.h"
+#include "common/endian.h"
 
 using namespace machine;
 

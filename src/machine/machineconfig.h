@@ -36,7 +36,7 @@
 #ifndef MACHINECONFIG_H
 #define MACHINECONFIG_H
 
-#include "memory/endian.h"
+#include "common/endian.h"
 
 #include <QSettings>
 #include <QString>

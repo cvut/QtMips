@@ -47,6 +47,7 @@
 #define LETTERW 7
 //////////////////////
 
+#include "common/endian.h"
 #include "machine/memory/cache/cache.h"
 
 #include <iostream>
@@ -426,9 +427,9 @@ void CacheViewBlock::cache_update(
             valid ? QString("0x")
                         + QString("%1")
                               .arg(
-                                  machine::byteswap_if(
+                                  byteswap_if(
                                       data[i], simulated_machine_endian
-                                                   != machine::NATIVE_ENDIAN),
+                                                   != NATIVE_ENDIAN),
                                   8, 16, QChar('0'))
                               .toUpper()
                   : "");

@@ -38,7 +38,7 @@
 #ifndef MEMORY_UTILS_H
 #define MEMORY_UTILS_H
 
-#include "memory/endian.h"
+#include "common/endian.h"
 #include "utils.h"
 
 #include <cstdint>

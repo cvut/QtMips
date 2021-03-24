@@ -35,6 +35,7 @@
 
 #include "memory/memory_bus.h"
 
+#include "common/endian.h"
 #include "memory/memory_utils.h"
 
 using namespace machine;

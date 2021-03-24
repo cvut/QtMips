@@ -38,6 +38,7 @@
 #ifndef BACKEND_MEMORY_H
 #define BACKEND_MEMORY_H
 
+#include "common/endian.h"
 #include "machinedefs.h"
 #include "memory/memory_utils.h"
 

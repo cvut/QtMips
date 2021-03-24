@@ -37,6 +37,7 @@
 
 #include "memory/backend/memory.h"
 
+#include "common/endian.h"
 #include "simulator_exception.h"
 
 #include <memory>

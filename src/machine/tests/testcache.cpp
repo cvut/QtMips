@@ -33,6 +33,7 @@
  *
  ******************************************************************************/
 
+#include "common/endian.h"
 #include "machine/memory/backend/memory.h"
 #include "machine/memory/cache/cache.h"
 #include "machine/memory/cache/cache_policy.h"
