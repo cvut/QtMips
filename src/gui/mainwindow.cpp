@@ -33,6 +33,7 @@
  *
  ******************************************************************************/
 
+#include <QProcessEnvironment>
 #include <QtWidgets>
 #ifdef WITH_PRINTING
     #include <QPrintDialog>
@@ -62,17 +63,18 @@
     #include <QFileInfo>
 #endif
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QSettings *settings, QWidget *parent)
+    : QMainWindow(parent)
+    , settings(settings) {
     ignore_unsaved = false;
     machine = nullptr;
     corescene = nullptr;
     current_srceditor = nullptr;
     coreview_shown = true;
-    settings = new QSettings("CTU", "QtMips");
 
     ui = new Ui::MainWindow();
     ui->setupUi(this);
-    setWindowTitle("QtMips");
+    setWindowTitle(APP_NAME);
     setDockNestingEnabled(true);
 
     central_window = new QTabWidget(this);
@@ -212,8 +214,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     foreach (
         QString file_name, settings->value("openSrcFiles").toStringList()) {
-        if (file_name.isEmpty()) continue;
-        SrcEditor *editor = new SrcEditor();
+        if (file_name.isEmpty()) { continue; }
+        auto *editor = new SrcEditor();
         if (editor->loadFile(file_name)) {
             add_src_editor_to_tabs(editor);
         } else {
@@ -222,8 +224,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     }
 
     QDir samples_dir(":/samples");
-    for (QString fname : samples_dir.entryList(QDir::Files)) {
-        TextSignalAction *textsigac = new TextSignalAction(fname, ":/samples/" + fname);
+    for (const QString &fname : samples_dir.entryList(QDir::Files)) {
+        auto *textsigac = new TextSignalAction(fname, ":/samples/" + fname);
         ui->menuExamples->addAction(textsigac);
         connect(
             textsigac, &TextSignalAction::activated, this,

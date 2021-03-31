@@ -65,7 +65,7 @@ class MainWindow : public QMainWindow {
     friend class SimpleAsmWithEditorCheck;
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    MainWindow(OWNED QSettings *settings, QWidget *parent = nullptr);
     ~MainWindow() override;
 
     void start();
@@ -169,7 +169,7 @@ private:
 
     QActionGroup *speed_group {};
 
-    QSettings *settings;
+    OWNED QSettings *settings;
 
     machine::Machine *machine; // Current simulated machine
 
