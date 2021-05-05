@@ -106,7 +106,7 @@ even that is not an option then default directory when the emulator has been sta
 Tests are managed by CTest (part of CMake). To build and run all tests, use this commands:
 
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtRVSim
+cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtmips
 make
 ctest
 ```
@@ -358,7 +358,7 @@ TLTI TLTIU TLTU TNE TNEI WSBH XOR XORI
 * SPIM/QtSPIM: A MIPS32 Simulator [http://spimsimulator.sourceforge.net/](http://spimsimulator.sourceforge.net/)
 * MARS: IDE with detailed help and hints [http://courses.missouristate.edu/KenVollmar/MARS/index.htm](http://courses.missouristate.edu/KenVollmar/MARS/index.htm)
 * EduMIPS64: 1x fixed and 3x FP pipelines [https://www.edumips.org/](https://www.edumips.org/)
-* Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and QtRvSim development
+* Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and qtmips development
 
 ## Copyright
 
