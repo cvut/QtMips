@@ -114,22 +114,23 @@ set(gui_HEADERS
         textsignalaction.h
         )
 set(gui_UI
-        gotosymboldialog.ui
-        NewDialog.ui
-        peripheralsview.ui
-        MainWindow.ui
-        NewDialogCache.ui
-        )
+    gotosymboldialog.ui
+    NewDialog.ui
+    peripheralsview.ui
+    MainWindow.ui
+    NewDialogCache.ui
+    )
 set(gui_RESOURCES
         icons.qrc
         samples.qrc
         )
 
-if ("${CMAKE_SYSTEM_NAME}" MATCHES "Emscripten")
-    message("gui :: Including WASM only files.")
-    list(APPEND gui_SOURCES qhtml5file_html5.cpp)
-    list(APPEND gui_HEADERS qhtml5file.h)
-endif ()
+
+if("${WASM}")
+	message(STATUS "gui :: Including WASM only files.")
+	list(APPEND gui_SOURCES qhtml5file_html5.cpp)
+	list(APPEND gui_HEADERS qhtml5file.h)
+endif()
 
 # MACOS
 set(ICON_NAME gui)
@@ -147,14 +148,15 @@ target_link_libraries(gui
         PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
         PRIVATE machine os_emulation assembler)
 target_compile_definitions(gui
-        PRIVATE
-        APP_ORGANIZATION=\"${MAIN_PROJECT_ORGANIZATION}\"
-        APP_ORGANIZATION_DOMAIN=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
-        APP_NAME=\"${MAIN_PROJECT_NAME}\"
-        APP_VERSION=\"${MAIN_PROJECT_VERSION}\"
-        ENV_CONFIG_FILE_NAME=\"${MAIN_PROJECT_NAME_UPPER}_CONFIG_FILE\")
+                           PRIVATE
+                           APP_ORGANIZATION=\"${MAIN_PROJECT_ORGANIZATION}\"
+                           APP_ORGANIZATION_DOMAIN=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
+                           APP_GIT=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
+                           APP_NAME=\"${MAIN_PROJECT_NAME}\"
+                           APP_VERSION=\"${MAIN_PROJECT_VERSION}\"
+                           ENV_CONFIG_FILE_NAME=\"${MAIN_PROJECT_NAME_UPPER}_CONFIG_FILE\")
 set_target_properties(gui PROPERTIES
-        OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
+                      OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
 
 if(${Qt5PrintSupport_FOUND})
     target_link_libraries(gui PRIVATE Qt5::PrintSupport)

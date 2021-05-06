@@ -67,11 +67,11 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
     hl->addWidget(vbox);
 
     QString versionText;
-    versionText = "Version 0.7.5\n";
+    versionText = "Version " APP_VERSION "\n";
 
-    vl->addWidget(
-        new QLabel("<span style='font-size:x-large; font-weight:bold;'>Qt Mips "
-                   "- MIPS Architecture Simulator</span>"));
+    vl->addWidget(new QLabel("<span style='font-size:x-large; font-weight:bold;"
+                             "'>" APP_NAME " "
+                             "- MIPS Architecture Simulator</span>"));
     lbl = new QLabel(versionText);
     lbl->setAlignment(Qt::AlignHCenter);
     lbl->setOpenExternalLinks(true);
@@ -85,8 +85,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
 
     QString supportText;
     supportText = "Home Page : <a "
-                  "href=\"https://github.com/cvut/QtMips\">https://github.com/"
-                  "cvut/QtMips</a><br/>"
+                  "href=\"" APP_GIT "\">" APP_GIT "</a><br/>"
                   "Implemented for<br/>"
                   "<a "
                   "href=\"https://cw.fel.cvut.cz/wiki/courses/b35apo/"
