@@ -1,0 +1,12 @@
+/**
+ * Transfers project information form CMake to C++.
+ * @file
+ */
+#ifndef PROJECT_INFO_H_IN
+#define PROJECT_INFO_H_IN
+
+constexpr const char *COPYRIGHT_HTML = "@COPYRIGHT_HTML@";
+constexpr const char *LICENCE_HTML = "@LICENCE_SHORT_HTML@";
+
+
+#endif // PROJECT_INFO_H_IN
