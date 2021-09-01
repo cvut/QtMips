@@ -102,8 +102,7 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
             Input, "Getting elf class failed", elf_errmsg(-1));
     }
     if (elf_class != ELFCLASS32) {
-        throw SIMULATOR_EXCEPTION(
-            Input, "Only supported architecture is 32bit", "");
+        throw SIMULATOR_EXCEPTION(Input, "Only supported architecture is 32bit", "");
     }
 
     // Get number of program sections in elf file
@@ -113,14 +112,11 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
     }
     // Get program sections headers
     if (!(this->phdrs = elf32_getphdr(this->elf))) {
-        throw SIMULATOR_EXCEPTION(
-            Input, "Elf program sections get failed", elf_errmsg(-1));
+        throw SIMULATOR_EXCEPTION(Input, "Elf program sections get failed", elf_errmsg(-1));
     }
     // We want only LOAD sections so we create map of those sections
     for (unsigned i = 0; i < this->n_secs; i++) {
-        if (phdrs[i].p_type != PT_LOAD) {
-            continue;
-        }
+        if (phdrs[i].p_type != PT_LOAD) { continue; }
         this->map.push_back(i);
     }
     // TODO instead of direct access should we be using sections and elf_data?
@@ -154,9 +150,7 @@ Address ProgramLoader::end() {
     // Go trough all sections and found out last one
     for (size_t i : this->map) {
         Elf32_Phdr *phdr = &(this->phdrs[i]);
-        if ((phdr->p_vaddr + phdr->p_filesz) > last) {
-            last = phdr->p_vaddr + phdr->p_filesz;
-        }
+        if ((phdr->p_vaddr + phdr->p_filesz) > last) { last = phdr->p_vaddr + phdr->p_filesz; }
     }
     return Address(last + 0x10); // We add offset so we are sure that also
                                  // pipeline is empty TODO propagate address

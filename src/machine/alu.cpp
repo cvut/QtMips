@@ -44,17 +44,14 @@ using namespace machine;
 
 static inline uint32_t alu_op_clz(uint32_t n) {
     int intbits = sizeof(int) * CHAR_BIT;
-    if (n == 0) {
-        return 32;
-    }
+    if (n == 0) { return 32; }
     return __builtin_clz(n) - (intbits - 32);
 }
 
 #else /* Fallback for generic compiler */
 
 // see https://en.wikipedia.org/wiki/Find_first_set#CLZ
-static const uint8_t sig_table_4bit[16]
-    = { 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
+static const uint8_t sig_table_4bit[16] = { 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
 
 static inline uint32_t alu_op_clz(uint32_t n) {
     int len = 32;
@@ -108,9 +105,7 @@ RegisterValue machine::alu_operate(
     case ALU_OP_SLL: return t.as_u32() << sa;
     case ALU_OP_SRL: return t.as_u32() >> sa;
     case ALU_OP_ROTR:
-        if (!sa) {
-            return t.as_u32();
-        }
+        if (!sa) { return t.as_u32(); }
         return (t.as_u32() >> sa) | (t.as_u32() << (32U - sa));
     case ALU_OP_SRA:
         // Note: This might be broken with some compilers but works with gcc
@@ -119,9 +114,7 @@ RegisterValue machine::alu_operate(
     case ALU_OP_SRLV: return t.as_u32() >> (s.as_u32() & 0x1fU);
     case ALU_OP_ROTRV:
         u32_val = s.as_u32() & 0x1fU;
-        if (!u32_val) {
-            return t.as_u32();
-        }
+        if (!u32_val) { return t.as_u32(); }
         return (t.as_u32() >> u32_val) | (t.as_u32() << (32 - u32_val));
     case ALU_OP_SRAV:
         // Note: same note as in case of SRA
@@ -167,9 +160,7 @@ RegisterValue machine::alu_operate(
     case ALU_OP_ADD:
         /* s(31) ^ ~t(31) ... same signs on input  */
         /* (s + t)(31) ^ s(31)  ... different sign on output */
-        if (((s.as_u32() ^ ~t.as_u32())
-             & ((s.as_u32() + t.as_u32()) ^ s.as_u32()))
-            & 0x80000000) {
+        if (((s.as_u32() ^ ~t.as_u32()) & ((s.as_u32() + t.as_u32()) ^ s.as_u32())) & 0x80000000) {
             excause = EXCAUSE_OVERFLOW;
         }
         FALLTROUGH
@@ -177,9 +168,7 @@ RegisterValue machine::alu_operate(
     case ALU_OP_SUB:
         /* s(31) ^ t(31) ... differnt signd on input */
         /* (s - t)(31) ^ ~s(31)  <> 0 ... otput sign differs from s  */
-        if (((s.as_u32() ^ t.as_u32())
-             & ((s.as_u32() - t.as_u32()) ^ s.as_u32()))
-            & 0x80000000) {
+        if (((s.as_u32() ^ t.as_u32()) & ((s.as_u32() - t.as_u32()) ^ s.as_u32())) & 0x80000000) {
             excause = EXCAUSE_OVERFLOW;
         }
         FALLTROUGH
@@ -215,39 +204,25 @@ RegisterValue machine::alu_operate(
         alu_write_hi_lo_64bit(regs, u64_val);
         return 0x0;
     case ALU_OP_TGE:
-        if (s.as_i32() >= t.as_i32()) {
-            excause = EXCAUSE_TRAP;
-        }
+        if (s.as_i32() >= t.as_i32()) { excause = EXCAUSE_TRAP; }
         return 0;
     case ALU_OP_TGEU:
-        if (s.as_u32() >= t.as_u32()) {
-            excause = EXCAUSE_TRAP;
-        }
+        if (s.as_u32() >= t.as_u32()) { excause = EXCAUSE_TRAP; }
         return 0;
     case ALU_OP_TLT:
-        if (s.as_i32() < t.as_i32()) {
-            excause = EXCAUSE_TRAP;
-        }
+        if (s.as_i32() < t.as_i32()) { excause = EXCAUSE_TRAP; }
         return 0;
     case ALU_OP_TLTU:
-        if (s.as_u32() < t.as_u32()) {
-            excause = EXCAUSE_TRAP;
-        }
+        if (s.as_u32() < t.as_u32()) { excause = EXCAUSE_TRAP; }
         return 0;
     case ALU_OP_TEQ:
-        if (s.as_u32() == t.as_u32()) {
-            excause = EXCAUSE_TRAP;
-        }
+        if (s.as_u32() == t.as_u32()) { excause = EXCAUSE_TRAP; }
         return 0;
     case ALU_OP_TNE:
-        if (s.as_u32() != t.as_u32()) {
-            excause = EXCAUSE_TRAP;
-        }
+        if (s.as_u32() != t.as_u32()) { excause = EXCAUSE_TRAP; }
         return 0;
     case ALU_OP_LUI: return t.as_u32() << 16U;
-    case ALU_OP_WSBH:
-        return ((t.as_u32() << 8U) & 0xff00ff00)
-               | ((t.as_u32() >> 8U) & 0x00ff00ffU);
+    case ALU_OP_WSBH: return ((t.as_u32() << 8U) & 0xff00ff00) | ((t.as_u32() >> 8U) & 0x00ff00ffU);
     case ALU_OP_SEB: return t.as_i8();
     case ALU_OP_SEH: return t.as_i16();
     case ALU_OP_EXT: return (s.as_u32() >> sa) & ((1 << (sz + 1)) - 1);
@@ -267,7 +242,6 @@ RegisterValue machine::alu_operate(
     case ALU_OP_ERET: return 0;
     default:
         throw SIMULATOR_EXCEPTION(
-            UnsupportedAluOperation, "Unknown ALU operation",
-            QString::number(operation, 16));
+            UnsupportedAluOperation, "Unknown ALU operation", QString::number(operation, 16));
     }
 }
