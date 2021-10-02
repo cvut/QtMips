@@ -170,7 +170,7 @@ uint32_t SerialPort::read_reg(Offset source, AccessEffects type) const {
     case SERP_TX_ST_REG_o: value = tx_st_reg | SERP_TX_ST_REG_READY_m; break;
     default:
         printf(
-            "WARNING: Serial port - read out of range (at 0x%ld).\n", source);
+            "WARNING: Serial port - read out of range (at 0x%lu).\n", source);
         break;
     }
 
@@ -201,7 +201,7 @@ bool SerialPort::write_reg(Offset destination, uint32_t value) {
             return true;
         default:
             printf(
-                "WARNING: Serial port - write out of range (at 0x%ld).\n",
+                "WARNING: Serial port - write out of range (at 0x%lu).\n",
                 destination);
             return false;
         }

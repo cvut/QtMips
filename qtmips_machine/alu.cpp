@@ -35,6 +35,8 @@
 
 #include "alu.h"
 
+#include <climits>
+
 #include "qtmipsexception.h"
 #include "utils.h"
 
