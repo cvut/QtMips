@@ -35,6 +35,8 @@
 
 #include "alu.h"
 
+#include <climits>
+
 #include "simulator_exception.h"
 #include "utils.h"
 

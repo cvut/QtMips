@@ -55,11 +55,13 @@ MemorySection::MemorySection(const MemorySection &other)
     , dt(other.dt) {}
 
 WriteResult MemorySection::write(
-    Offset destination,
+    Offset dst_offset,
     const void *source,
     size_t size,
     WriteOptions options) {
     UNUSED(options)
+
+    size_t destination = static_cast<size_t>(dst_offset);
 
     if (destination >= length()) {
         throw SIMULATOR_EXCEPTION(
@@ -82,10 +84,12 @@ WriteResult MemorySection::write(
 
 ReadResult MemorySection::read(
     void *destination,
-    Offset source,
+    Offset src_offset,
     size_t size,
     ReadOptions options) const {
     UNUSED(options)
+
+    size_t source = static_cast<size_t>(src_offset);
 
     size = std::min(source + size, length()) - source;
 

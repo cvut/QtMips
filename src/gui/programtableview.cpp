@@ -38,6 +38,7 @@
 #include "hinttabledelegate.h"
 #include "programmodel.h"
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QClipboard>
 #include <QFontMetrics>
@@ -84,15 +85,22 @@ void ProgramTableView::adjustColumnCount() {
         return;
     }
 
+    QStyleOptionViewItem viewOpts;
+    #if QT_VERSION >= 0x060000
+        initViewItemOption(&viewOpts);
+    #else
+        viewOpts = viewOptions();
+    #endif
+
     idx = m->index(0, 0);
-    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx, "Bp").width() + 2;
+    cwidth_dh = delegate->sizeHintForText(viewOpts, idx, "Bp").width() + 2;
     horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(0, cwidth_dh);
     totwidth = cwidth_dh;
 
     idx = m->index(0, 1);
     cwidth_dh
-        = delegate->sizeHintForText(viewOptions(), idx, "0x00000000").width()
+        = delegate->sizeHintForText(viewOpts, idx, "0x00000000").width()
           + 2;
     horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(1, cwidth_dh);
@@ -100,7 +108,7 @@ void ProgramTableView::adjustColumnCount() {
 
     idx = m->index(0, 2);
     cwidth_dh
-        = delegate->sizeHintForText(viewOptions(), idx, "00000000").width() + 2;
+        = delegate->sizeHintForText(viewOpts, idx, "00000000").width() + 2;
     horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(2, cwidth_dh);
     totwidth += cwidth_dh;
@@ -109,7 +117,7 @@ void ProgramTableView::adjustColumnCount() {
     idx = m->index(0, 3);
     totwidth
         += delegate
-               ->sizeHintForText(viewOptions(), idx, "BEQ $18, $17, 0x80020058")
+               ->sizeHintForText(viewOpts, idx, "BEQ $18, $17, 0x80020058")
                .width()
            + 2;
     totwidth += verticalHeader()->width();

@@ -70,7 +70,7 @@ inline RegisterId::RegisterId(uint8_t value) : data(value) {
     SANITY_ASSERT(
         data < REGISTER_COUNT,
         QString("Trying to create register id for out-of-bounds register ")
-            + QString(data));
+            + QString::number(data));
 };
 
 inline RegisterId operator"" _reg(unsigned long long value) {
