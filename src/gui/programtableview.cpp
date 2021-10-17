@@ -86,7 +86,7 @@ void ProgramTableView::adjustColumnCount() {
     }
 
     QStyleOptionViewItem viewOpts;
-    #if QT_VERSION >= 0x060000
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         initViewItemOption(&viewOpts);
     #else
         viewOpts = viewOptions();
