@@ -3,7 +3,7 @@ cmake_policy(VERSION 3.10)
 
 project(QtMips
         LANGUAGES C CXX
-        VERSION 0.7.5
+        VERSION 0.8.0
         DESCRIPTION "MIPS CPU simulator for education purposes")
 
 set(KAREL_KOCI "Karel Koci <cynerd@email.cz>")

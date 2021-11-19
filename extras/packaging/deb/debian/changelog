@@ -1,3 +1,11 @@
+qtmips (0.8.0-1) unstable; urgency=medium
+   
+  * Debian package updated to version 0.8.0-1.
+  * CMake build backported from qtrvsim
+  * New memory model
+
+ -- Jakub Dupak <dev@jakubdupak.com>  Fri, 19 Nov 2021 14:56:38 +0100
+
 qtmips (0.7.5) unstable; urgency=medium
 
   * Debian package updated to version 0.7.5.
