@@ -75,14 +75,14 @@ add_library(machine STATIC
         ${machine_SOURCES}
         ${machine_HEADERS})
 target_link_libraries(machine
-        PRIVATE Qt5::Core
+        PRIVATE ${QtLib}::Core
         PUBLIC libelf)
 
 if (NOT ${WASM})
     # Machine tests (not available on WASM)
     add_executable(machine_unit_tests ${machine_TESTS})
     target_link_libraries(machine_unit_tests
-            PRIVATE machine Qt5::Core Qt5::Test)
+            PRIVATE machine ${QtLib}::Core ${QtLib}::Test)
 
     add_test(NAME machine_unit_tests
             COMMAND machine_unit_tests)
