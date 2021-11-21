@@ -1,11 +1,14 @@
 project(polyfills
-        DESCRIPTION "Helper code to unify access to compiler intrinsics and
+		DESCRIPTION "Helper code to unify access to compiler intrinsics and
                      provide fallback implementations.")
 
 set(polyfills_HEADERS
-        endian_detection.h
-        byteswap.h
-        )
+		endian_detection.h
+		byteswap.h
+		qt5/qfontmetrics.h
+		qt5/qlinef.h
+		qt5/qtableview.h
+		)
 
 # =============================================================================
 # Target for usage of this header library

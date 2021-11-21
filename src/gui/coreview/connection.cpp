@@ -35,6 +35,7 @@
 
 #include "connection.h"
 
+#include "common/polyfills/qt5/qlinef.h"
 #include "machine/simulator_exception.h"
 
 #include <cmath>
@@ -180,15 +181,7 @@ void Connection::recalc_line() {
 
 bool Connection::recalc_line_add_point(const QLineF &l1, const QLineF &l2) {
     QPointF intersec;
-    #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-        if (l1.intersects(l2, &intersec) == QLineF::NoIntersection) {
-            return false;
-        }
-    #else
-        if (l1.intersect(l2, &intersec) == QLineF::NoIntersection) {
-            return false;
-        }
-    #endif
+    if (QLineF_intersect(l1, l2, &intersec) == QLineF::NoIntersection) { return false; }
     points.append(intersec);
     return true;
 }
@@ -230,11 +223,11 @@ static qreal cu_closest(const QLineF &l, const QPointF &p, QPointF *intersec) {
     QLineF nline = normal.translated(-normal.p1()).translated(p);
     // And now found intersection
     SANITY_ASSERT(
-        #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            l.intersects(nline, intersec) != QLineF::NoIntersection,
-        #else
-            l.intersect(nline, intersec) != QLineF::NoIntersection,
-        #endif
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+        l.intersects(nline, intersec) != QLineF::NoIntersection,
+#else
+        l.intersect(nline, intersec) != QLineF::NoIntersection,
+#endif
         "We are calculating intersection with normal vector and that should "
         "always have intersection");
     // Now check if that point belongs to given line

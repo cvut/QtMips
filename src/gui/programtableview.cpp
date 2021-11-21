@@ -86,11 +86,7 @@ void ProgramTableView::adjustColumnCount() {
     }
 
     QStyleOptionViewItem viewOpts;
-    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        initViewItemOption(&viewOpts);
-    #else
-        viewOpts = viewOptions();
-    #endif
+    initViewItemOption(&viewOpts);
 
     idx = m->index(0, 0);
     cwidth_dh = delegate->sizeHintForText(viewOpts, idx, "Bp").width() + 2;
