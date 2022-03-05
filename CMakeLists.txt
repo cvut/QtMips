@@ -43,7 +43,7 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target"
     CACHE STRING "Absolute path to place executables to.")
 set(PACKAGE_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}/pkg"
     CACHE STRING "Absolute path to place generated package files.")
-
+set(FORCE_COLORED_OUTPUT false CACHE BOOL "Always produce ANSI-colored output (GNU/Clang only).")
 
 # =============================================================================
 # Generated variables
@@ -101,10 +101,19 @@ endif()
 
 if("${BUILD_RELEASE}")
 	message(STATUS "Debug prints globally suppressed.")
-	add_compile_definitions(QT_NO_DEBUG_OUTPUT=1)
+	add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
 endif()
 
 include_directories("src" "src/machine")
+
+
+if(${FORCE_COLORED_OUTPUT})
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		add_compile_options(-fdiagnostics-color=always)
+	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		add_compile_options(-fcolor-diagnostics)
+	endif()
+endif()
 
 ## ============================================================================
 ## Warning level
@@ -115,7 +124,7 @@ if(MSVC)
 else()
 	add_compile_options(-Wall -Wextra)
 	if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		# This is currently a wontfix and it will be OK in cpp20.
+		# This is currently a wont-fix and it will be OK in cpp20.
 		add_compile_options(-Wno-c99-designator)
 	endif()
 endif()
@@ -139,7 +148,7 @@ if("${WASM}")
 	add_link_options("SHELL:-s EXTRA_EXPORTED_RUNTIME_METHODS=[\"UTF16ToString\",\"stringToUTF16\"]")
 	add_link_options("--bind")
 
-	add_compile_definitions(QT_NO_DEBUG_OUTPUT=1)
+	add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
 	message(STATUS "Debug output disabled")
 
 else()
@@ -181,7 +190,7 @@ message(STATUS "${QtLib} print support: ${${QtLib}PrintSupport_FOUND}")
 
 
 # Qt 5.9.5 is the oldest supported
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050905)
+add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050905)
 
 # =============================================================================
 # Sources
@@ -194,6 +203,8 @@ add_subdirectory("src/os_emulation")
 add_subdirectory("src/gui")
 if(NOT "${WASM}")
 	add_subdirectory("src/cli")
+	add_custom_target(all_unit_tests
+			DEPENDS common_unit_tests machine_unit_tests)
 endif()
 
 # =============================================================================

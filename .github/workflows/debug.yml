@@ -18,7 +18,7 @@ jobs:
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
             qt_version: "native",
-            qt_install_command: "sudo apt-get install qt5-default"
+            qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default"
               # Apt is significantly faster that aqt.
           }
           - {
@@ -89,6 +89,7 @@ jobs:
                     -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
                     -DCMAKE_C_COMPILER=${{ matrix.config.cc }}
                     -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
+                    -DFORCE_COLORED_OUTPUT=true
                     -G \"${{ matrix.config.build_system }}\""
 
       - name: Build
@@ -98,7 +99,7 @@ jobs:
       - name: Test
         working-directory: ${{ github.workspace }}/build
         shell: bash
-        run: ctest
+        run: ctest --output-on-failure --verbose
 
       - name: Store created artifacts
         uses: actions/upload-artifact@v2
@@ -119,7 +120,7 @@ jobs:
             os: ubuntu-latest,
             build_type: Release,
             qt_arch: wasm_32,
-            emsdk_version: 1.39.20,
+            emsdk_version: 1.39.8,
             qt_version: 5.15.2,
           }
     steps:
@@ -162,6 +163,7 @@ jobs:
                     -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
                     -DCMAKE_PREFIX_PATH=$Qt5_DIR
                     -DCMAKE_FIND_ROOT_PATH=$Qt5_DIR
+                    -DFORCE_COLORED_OUTPUT=true
                     -Wno-dev"
 
       - name: Build
