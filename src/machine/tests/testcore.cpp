@@ -935,6 +935,111 @@ static void core_memory_tests_data() {
         QTest::newRow("lwr_lrl_swr_swl")
             << code << regs_init << regs_res << mem_init << mem_res;
     }
+
+    // lwr, lwl, swr, swl little endian
+    {
+        QVector<uint32_t> code {
+            // __start:
+            0x3c1c8003, // lui     gp,0x8003
+            0x279c90d0, // addiu   gp,gp,-28464
+            // main:
+            0x3c1aaabb, // lui     k0,0xaabb
+            0x375accdd, // ori     k0,k0,0xccdd
+            0x23420000, // addi    v0,k0,0
+            0x23430000, // addi    v1,k0,0
+            0x23440000, // addi    a0,k0,0
+            0x23450000, // addi    a1,k0,0
+            0x23460000, // addi    a2,k0,0
+            0x23470000, // addi    a3,k0,0
+            0x23480000, // addi    t0,k0,0
+            0x23490000, // addi    t1,k0,0
+            0x234a0000, // addi    t2,k0,0
+            0x3c1b8002, // lui     k1,0x8002
+            0x277b0100, // addiu   k1,k1,0x100
+            0x9b620000, // lwr     v0,0(k1)
+            0x9b630001, // lwr     v1,1(k1)
+            0x9b640002, // lwr     a0,2(k1)
+            0x9b650003, // lwr     a1,3(k1)
+            0x8b660000, // lwl     a2,0(k1)
+            0x8b670001, // lwl     a3,1(k1)
+            0x8b680002, // lwl     t0,2(k1)
+            0x8b690003, // lwl     t1,3(k1)
+            0xbb7a0000, // swr     k0,0(k1)
+            0xbb7a0005, // swr     k0,5(k1)
+            0xbb7a000a, // swr     k0,10(k1)
+            0xbb7a000f, // swr     k0,15(k1)
+            0xab7a0014, // swl     k0,20(k1)
+            0xab7a0019, // swl     k0,25(k1)
+            0xab7a001e, // swl     k0,30(k1)
+            0xab7a0023, // swl     k0,35(k1)
+            0x8f6a0000, // lw      t2,0(k1)
+            0x8f6b0004, // lw      t3,4(k1)
+            0x8f6c0008, // lw      t4,8(k1)
+            0x8f6d000c, // lw      t5,12(k1)
+            0x8f6e0010, // lw      t6,16(k1)
+            0x8f6f0014, // lw      t7,20(k1)
+            0x8f700018, // lw      s0,24(k1)
+            0x8f71001c, // lw      s1,28(k1)
+            0x8f720020, // lw      s2,32(k1)
+            0x8f730020, // lw      s3,32(k1)
+            0xbd090000, // cache   0x9,0(t0)
+            // loop:
+            0x1000ffff, // b       800200a4 <loop>
+            0x00000000, // nop
+            // mem:
+        };
+        Registers regs_init;
+        regs_init.pc_abs_jmp(0x80020000_addr);
+        Registers regs_res(regs_init);
+
+        regs_res.write_gp(2, 0x04030201);
+        regs_res.write_gp(3, 0xaa040302);
+        regs_res.write_gp(4, 0xaabb0403);
+        regs_res.write_gp(5, 0xaabbcc04);
+        regs_res.write_gp(6, 0x01bbccdd);
+        regs_res.write_gp(7, 0x0201ccdd);
+        regs_res.write_gp(8, 0x030201dd);
+        regs_res.write_gp(9, 0x04030201);
+        regs_res.write_gp(10, 0xaabbccdd);
+        regs_res.write_gp(11, 0xbbccdd05);
+        regs_res.write_gp(12, 0xccdd0a09);
+        regs_res.write_gp(13, 0xdd0f0e0d);
+        regs_res.write_gp(14, 0x14131211);
+        regs_res.write_gp(15, 0x181716aa);
+        regs_res.write_gp(16, 0x1c1baabb);
+        regs_res.write_gp(17, 0x10aabbcc);
+        regs_res.write_gp(18, 0xaabbccdd);
+        regs_res.write_gp(19, 0xaabbccdd);
+
+        regs_res.write_gp(26, 0xaabbccdd);
+        regs_res.write_gp(27, 0x80020100);
+        regs_res.write_gp(28, 0x800290d0);
+
+        uint32_t addr;
+        Memory mem_init(LITTLE);
+        addr = 0x80020100;
+        QVector<uint32_t> data_init { 0x04030201, 0x08070605, 0x0c0b0a09, 0x000f0e0d,
+                                      0x14131211, 0x18171615, 0x1c1b1a19, 0x101f1e1d,
+                                      0x24232221, 0x28272625, 0x2c2b2a29, 0x202f2e2d };
+        foreach (uint32_t i, data_init) {
+            memory_write_u32(&mem_init, addr, i);
+            addr += 4;
+        }
+        Memory mem_res(LITTLE);
+        addr = 0x80020100;
+        QVector<uint32_t> data_res { 0xaabbccdd, 0xbbccdd05, 0xccdd0a09, 0xdd0f0e0d,
+                                     0x14131211, 0x181716aa, 0x1c1baabb, 0x10aabbcc,
+                                     0xaabbccdd, 0x28272625, 0x2c2b2a29, 0x202f2e2d };
+        foreach (uint32_t i, data_res) {
+            memory_write_u32(&mem_res, addr, i);
+            addr += 4;
+        }
+
+        regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length() - 4);
+        QTest::newRow("lwr_lrl_swr_swl-le")
+            << code << regs_init << regs_res << mem_init << mem_res;
+    }
+
 }
 
 void MachineTests::singlecore_memory_tests_data() {
