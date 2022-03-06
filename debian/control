@@ -1,0 +1,15 @@
+Source: qtmips
+Section: devel
+Priority: optional
+Maintainer: Pavel Pisa <pisa@cmp.felk.cvut.cz>
+Build-Depends: debhelper (>= 9), qtbase5-dev, libelf-dev, cmake
+Standards-Version: 3.9.8
+Homepage: https://github.com/cvut/qtmips
+Vcs-Git: github.com:cvut/qtmips.git
+Vcs-Browser: https://github.com/cvut/qtmips
+
+Package: qtmips
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: MIPS CPU simulator for education purposes
+ MIPS CPU simulator for education purposes with pipeline and cache visualization.
