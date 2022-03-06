@@ -1,10 +1,12 @@
 qtmips (0.8.0-1) unstable; urgency=medium
-   
-  * Debian package updated to version 0.8.0-1.
-  * CMake build backported from qtrvsim
-  * New memory model
 
- -- Jakub Dupak <dev@jakubdupak.com>  Fri, 19 Nov 2021 14:56:38 +0100
+  * Debian package updated to version 0.8.0-1.
+  * Complete rewrite of memory model (by Jakub Dupak)
+  * Extended lwl, lwr, swl and swr instructions for little endian (by Pavel Pisa)
+  * Little endian support in addition to big endian one (by Jakub Dupak)
+  * CMake build backported from QtRVSim (by Jakub Dupak)
+
+ -- Jakub Dupak <dev@jakubdupak.com>  Fri, 06 Mar 2022 17:41:30 +0100
 
 qtmips (0.7.5) unstable; urgency=medium
 

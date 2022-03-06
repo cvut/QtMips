@@ -501,7 +501,7 @@ bool assemble(Machine &machine, MsgReport &msgrep, QString filename) {
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("cli");
-    QCoreApplication::setApplicationVersion("0.7.5");
+    QCoreApplication::setApplicationVersion("0.8.0");
     set_default_log_pattern();
 
     QCommandLineParser p;
