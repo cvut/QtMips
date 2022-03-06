@@ -47,7 +47,7 @@ jobs:
           }
           - {
             name: "Windows Latest MinGW",
-            os: windows-latest,
+            os: windows-2019,
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "MinGW Makefiles",
             # Older Qt releases do not have 64bit mingw release
