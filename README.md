@@ -30,6 +30,16 @@ professors Patterson and Hennessy.
 Additional documentation can be found in subdirectory [`docs`](docs)
 of the project.
 
+## Try it out! (WebAssembly)
+
+QtMips is experimentally available for [WebAssembly](https://webassembly.org/)
+and it can be run in most browsers without installation.
+
+**[QtMips online](https://comparch.edu.cvut.cz/qtmips/app)**
+
+WebAssembly version is experimental and has some usability limitations compared
+to the native application.
+
 ## Build and packages
 
 ### Build Dependencies
