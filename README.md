@@ -82,7 +82,7 @@ Then build as in general compilation (above).
 
 ## Accepted Binary Formats
 
-The simulator accepts ELF statically linked executables compiled for 32-bit big-endian MISP target.
+The simulator accepts ELF statically linked executables compiled for 32-bit big-endian and little-endian MISP targets.
 
 Optimal is use of plain mips-elf GCC toolchain.
 
