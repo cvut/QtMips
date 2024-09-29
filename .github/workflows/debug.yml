@@ -1,6 +1,6 @@
 name: Debug
 
-on: [ push, workflow_dispatch, pull_request ]
+on: [ push, workflow_dispatch, pull_request, merge_group ]
 
 jobs:
   build:
@@ -18,8 +18,8 @@ jobs:
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
             qt_version: "native",
-            qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default"
-              # Apt is significantly faster that aqt.
+            qt_install_command: "sudo apt-get update && sudo apt-get install qtbase5-dev",
+            # Apt is significantly faster that aqt.
           }
           - {
             name: "Ubuntu Latest GCC + Qt6",
@@ -55,7 +55,7 @@ jobs:
           }
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache Qt
         # Cache only when not installed by os package manager
@@ -68,7 +68,7 @@ jobs:
 
       - name: Install specified Qt version
         if: matrix.config.qt_version != 'native'
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.config.qt_version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -102,7 +102,7 @@ jobs:
         run: ctest --output-on-failure --verbose
 
       - name: Store created artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}
           path: ${{ github.workspace }}/build/target
@@ -124,7 +124,7 @@ jobs:
             qt_version: 5.15.2,
           }
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache Qt
         id: cache-qt
@@ -135,19 +135,19 @@ jobs:
 
       - name: Setup EMSDK cache
         id: cache-system-libraries
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: 'emsdk-cache'
           key: ${{ runner.os }}-${{ matrix.config.emsdk_version }}-${{ matrix.config.qt_version }}-emsdk
 
       - name: Setup emsdk
-        uses: mymindstorm/setup-emsdk@v10
+        uses: mymindstorm/setup-emsdk@v11
         with:
           version: ${{ matrix.config.emsdk_version }}
           actions-cache-folder: 'emsdk-cache'
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.config.qt_version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -171,7 +171,7 @@ jobs:
         run: cmake --build . -j3
 
       - name: Store created artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: target-wasm-${{ runner.os }}-qt${{ matrix.config.qt_version }}
           path: ${{ github.workspace }}/build/target
