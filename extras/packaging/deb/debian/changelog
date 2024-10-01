@@ -1,3 +1,17 @@
+qtmips (0.8.1-1) unstable; urgency=medium
+
+  * Machine: LRU cache policy fix
+  * Machine: correct cache graphics visualization for byte accesses.
+  * CI: release.yml - fix apt install
+  * Machine: correct and refactor unaligned access to peripheries
+  * Machine: add memory access helper for access with granularity 16-bits.
+  * Machine: fix LCD display endianness.
+  * Packaging: fix Fedora build according to Jan Grulich advice.
+  * README: add link to WebAssembly version on comparch.edu.cvut.cz
+  * CI: update GitHub actions from QtRVSim
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Tue, 01 Oct 2024 20:45:22 +0200
+
 qtmips (0.8.0-1) unstable; urgency=medium
 
   * Debian package updated to version 0.8.0-1.
