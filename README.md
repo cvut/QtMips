@@ -2,20 +2,23 @@
 
 [![OpenHub](https://www.openhub.net/p/QtMips/widgets/project_thin_badge?format=gif)](https://www.openhub.net/p/QtMips) [![build status](https://dev.azure.com/qtmips/qtmips/_apis/build/status/cvut.QtMips?branchName=master)](https://dev.azure.com/qtmips/QtMips/_build/latest?definitionId=1&branchName=master)
 
-MIPS CPU simulator for education purposes.
+MIPS CPU simulator for education purposes with pipeline and cache visualizations.
 
-## Ongoing Development
+Developed by the [Computer Architectures Education](http://comparch.edu.cvut.cz) project
+at [Czech Technical University](http://www.cvut.cz/).
 
-* QtRVSim - [RISC-V](https://riscv.org/) architecture based edition ([https://github.com/cvut/qtrvsim](https://github.com/cvut/qtrvsim)), suggested for future contributions
-* QtMips development branch with little/endian support - [devel](https://github.com/cvut/QtMips/tree/devel)
-* Space for QtMips examples and students' contributions [https://github.com/cvut/QtMips-Playground](https://github.com/cvut/QtMips-Playground)
-
-Implemented to support following courses:
+Implemented to support following courses in the past (switched to RISC-V now):
 
 - [B35APO - Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo)
 - [B4M35PAP - Advanced Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b4m35pap/start)
 
-[Faculty of Electrical Engineering](http://www.fel.cvut.cz)[Czech Technical University](http://www.cvut.cz/)
+at [Faculty of Electrical Engineering](http://www.fel.cvut.cz)[Czech Technical University](http://www.cvut.cz/)
+
+## Ongoing Development
+
+* QtRVSim - [RISC-V](https://riscv.org/) architecture based edition ([https://github.com/cvut/qtrvsim](https://github.com/cvut/qtrvsim)), suggested for future contributions
+* Space for QtMips examples and students' contributions [https://github.com/cvut/QtMips-Playground](https://github.com/cvut/QtMips-Playground)
+
 ## Documentation
 
 The project has started as diploma theses work of Karel Kočí. The complete text of the thesis [Graphical CPU Simulator with Cache Visualization](https://dspace.cvut.cz/bitstream/handle/10467/76764/F3-DP-2018-Koci-Karel-diploma.pdf)
@@ -44,7 +47,7 @@ to the native application.
 
 ### Build Dependencies
 
-- Qt 5
+- Qt 5 or 6
 - elfutils (optional; libelf works too but there can be some problems)
 
 ### General Compilation
