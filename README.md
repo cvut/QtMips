@@ -12,7 +12,7 @@ Implemented to support following courses in the past (switched to RISC-V now):
 - [B35APO - Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo)
 - [B4M35PAP - Advanced Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b4m35pap/start)
 
-at [Faculty of Electrical Engineering](http://www.fel.cvut.cz)[Czech Technical University](http://www.cvut.cz/)
+at [Faculty of Electrical Engineering](http://www.fel.cvut.cz) [Czech Technical University](http://www.cvut.cz/)
 
 ## Ongoing Development
 
