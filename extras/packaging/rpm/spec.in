@@ -32,16 +32,15 @@ URL:            @PACKAGE_URL@
 Source:         @PACKAGE_SOURCE_ARCHIVE_FILE@
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
+BuildRequires:  hicolor-icon-theme
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(Qt5Core)
-BuildRequires:  pkgconfig(Qt5Widgets)
-BuildRequires:  pkgconfig(Qt5Test)
 BuildRequires:  pkgconfig(Qt5PrintSupport)
-BuildRequires:  hicolor-icon-theme
-
+BuildRequires:  pkgconfig(Qt5Test)
+BuildRequires:  pkgconfig(Qt5Widgets)
 %if ! 0%{?suse_version}
-BuildRequires:  pkgconfig(libelf)
 BuildRequires:  desktop-file-utils
+BuildRequires:  pkgconfig(libelf)
 %endif
 
 %if 0%{?suse_version}
@@ -72,16 +71,16 @@ BuildRequires:  update-desktop-files
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} || 0%{?centos}
-desktop-file-validate %{buildroot}/usr/share/applications/@PACKAGE_NAME@.desktop
+desktop-file-validate %{buildroot}%{_datadir}/applications/@PACKAGE_NAME@.desktop
 %endif
 
 # TODO: this should be generated from CMake
 %files
-/usr/bin/qtmips_gui
-/usr/bin/qtmips_cli
-/usr/share/icons/hicolor/scalable/apps/qtmips_gui.svg
-/usr/share/icons/hicolor/48x48/apps/qtmips_gui.png
-/usr/share/applications/qtmips.desktop
+%{_bindir}/qtmips_gui
+%{_bindir}/qtmips_cli
+%{_datadir}/icons/hicolor/scalable/apps/qtmips_gui.svg
+%{_datadir}/icons/hicolor/48x48/apps/qtmips_gui.png
+%{_datadir}/applications/qtmips.desktop
 
 %license LICENSE
 %doc README.md

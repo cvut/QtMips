@@ -249,7 +249,7 @@ if("${DEV_MODE}")
 	set(PACKAGE_MAINTAINER "${JAKUB_DUPAK}")
 	set(PACKAGE_URL "${PROJECT_HOMEPAGE_URL}")
 	set(PACKAGE_GIT "github.com:cvut/qtmips.git")
-	set(PACKAGE_LICENCE "${LICENCE} ")
+	set(PACKAGE_LICENCE "${LICENCE}")
 
 	include(cmake/PackageTools.cmake)
 
