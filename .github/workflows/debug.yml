@@ -102,7 +102,7 @@ jobs:
         if: runner.os == 'Windows'
         working-directory: ${{ github.workspace }}/build/target
         shell: bash
-        run: "windeployqt \"${{ github.workspace }}/build/target/qtrvsim_gui.exe\""
+        run: "windeployqt \"${{ github.workspace }}/build/target/qtmips_gui.exe\""
 
       - name: Test
         working-directory: ${{ github.workspace }}/build
