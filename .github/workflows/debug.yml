@@ -5,9 +5,9 @@ on: [ push, workflow_dispatch, pull_request, merge_group ]
 jobs:
   build:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
     # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -56,27 +56,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache Qt
-        # Cache only when not installed by os package manager
-        if: matrix.config.qt_version != 'native'
-        id: cache-qt
-        uses: actions/cache@v2
+      - name: Ccache
+        uses: hendrikmuhs/ccache-action@v1
         with:
-          path: ${{ github.workspace }}/Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
+          key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
       - name: Install specified Qt version
         if: matrix.config.qt_version != 'native'
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: ${{ matrix.config.qt_version }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
           arch: ${{ matrix.config.qt_arch }}
           dir: ${{ github.workspace }}/Qt
 
       - name: Install native Qt by package manager
         if: matrix.config.qt_version == 'native'
         run: ${{ matrix.config.qt_install_command }}
+
+      -  name: Setup Ninja
+         if: matrix.config.build_system == 'Ninja'
+         uses: seanmiddleditch/gha-setup-ninja@v6
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{ github.workspace }}/build
@@ -88,12 +89,20 @@ jobs:
                     -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
                     -DCMAKE_C_COMPILER=${{ matrix.config.cc }}
                     -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
+                    -DCMAKE_C_COMPILER_LAUNCHER=ccache
+                    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
                     -DFORCE_COLORED_OUTPUT=true
                     -G \"${{ matrix.config.build_system }}\""
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
-        run: cmake --build . -j3
+        run: cmake --build . -j4
+
+      - name: Deploy on Windows
+        if: runner.os == 'Windows'
+        working-directory: ${{ github.workspace }}/build/target
+        shell: bash
+        run: "windeployqt \"${{ github.workspace }}/build/target/qtrvsim_gui.exe\""
 
       - name: Test
         working-directory: ${{ github.workspace }}/build
@@ -108,8 +117,9 @@ jobs:
 
   build-emscripten:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -125,12 +135,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v2
+      - name: Ccache
+        uses: hendrikmuhs/ccache-action@v1.2.11 # https://github.com/hendrikmuhs/ccache-action/issues/181
         with:
-          path: ${{ github.workspace }}/Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-wasm-Qt
+          key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
       - name: Setup EMSDK cache
         id: cache-system-libraries
@@ -149,7 +157,8 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.config.qt_version }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: true
+          cache-key-prefix: 'wasm-qt'
           arch: ${{ matrix.config.qt_arch }}
           dir: ${{ github.workspace }}/Qt
 
@@ -162,12 +171,14 @@ jobs:
                     -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
                     -DCMAKE_PREFIX_PATH=$Qt5_DIR
                     -DCMAKE_FIND_ROOT_PATH=$Qt5_DIR
+                    -DCMAKE_C_COMPILER_LAUNCHER=ccache
+                    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
                     -DFORCE_COLORED_OUTPUT=true
                     -Wno-dev"
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
-        run: cmake --build . -j3
+        run: cmake --build . -j4
 
       - name: Store created artifacts
         uses: actions/upload-artifact@v4
